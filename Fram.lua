@@ -476,7 +476,7 @@ do
 	})
 	
 	local Tag = Window:Tag({
-		Title = "Mystic Farm🌾",
+		Title = "Farm🌾v0.1",
 		Color = "Text",
 	})
 
