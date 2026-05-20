@@ -1370,9 +1370,13 @@ end
 local function cleanupItemDrawings()
     for model, data in pairs(itemDrawings) do
         if not model or not model.Parent then
-            pcall(function() data.name:Remove()        end)
-            pcall(function() data.amount:Remove()      end)
-            pcall(function() if data.highlight then data.highlight:Destroy() end end)
+            pcall(function() data.name:Remove() end)
+            pcall(function() data.amount:Remove() end)
+            pcall(function()
+                if data.box then
+                    data.box:Remove()
+                end
+            end)
             itemDrawings[model] = nil
         end
     end
@@ -1381,75 +1385,93 @@ end
 RunService.RenderStepped:Connect(function()
     cleanupItemDrawings()
     if not DroppedItems then return end
+
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myRoot then return end
 
     -- Hide all
     for _, data in pairs(itemDrawings) do
-        data.name.Visible        = false
-        data.amount.Visible      = false
-        if data.highlight then data.highlight.Enabled = false end
+        data.name.Visible = false
+        data.amount.Visible = false
+        if data.box then
+            data.box.Visible = false
+        end
     end
 
     -- Collect & sort by distance
     local visible = {}
     for _, model in ipairs(DroppedItems:GetChildren()) do
         if model:IsA("Model") and model:FindFirstChild("PickUpZone") and not model:GetAttribute("Locked") then
-            local ok, zonePos = pcall(function() return model.PickUpZone.Position end)
+            local ok, zonePos = pcall(function()
+                return model.PickUpZone.Position
+            end)
+
             if ok and zonePos then
-                table.insert(visible, { item = model, dist = (zonePos - myRoot.Position).Magnitude })
+                table.insert(visible, {
+                    item = model,
+                    dist = (zonePos - myRoot.Position).Magnitude
+                })
             end
         end
     end
-    table.sort(visible, function(a, b) return a.dist < b.dist end)
+
+    table.sort(visible, function(a, b)
+        return a.dist < b.dist
+    end)
 
     for i = 1, math.min(20, #visible) do
         local model = visible[i].item
-        local data  = itemDrawings[model]
+        local data = itemDrawings[model]
+
         if not data then
             data = {
-                name        = Drawing.new("Text"),
-                amount      = Drawing.new("Text"),
+                name = Drawing.new("Text"),
+                amount = Drawing.new("Text"),
+                box = Drawing.new("Square")
             }
-            data.name.Outline           = true
-            data.name.OutlineColor      = Color3.fromRGB(0, 0, 0)
-            data.name.Center            = true
-            data.name.Size              = 16
-            data.name.Font              = 4
-            data.amount.Outline         = true
-            data.amount.OutlineColor    = Color3.fromRGB(0, 0, 0)
-            data.amount.Center          = true
-            data.amount.Size            = 13
-            data.amount.Color           = Color3.fromRGB(200, 200, 200)
-            itemDrawings[model]         = data
-        end
 
-        if not data.highlight or not data.highlight.Parent then
-            local h = Instance.new("Highlight")
-            h.Name              = "ESP_Highlight"
-            h.FillTransparency  = 0.5
-            h.OutlineTransparency = 0.1
-            h.Adornee           = model
-            h.Parent            = model
-            data.highlight      = h
+            -- Name
+            data.name.Outline = false
+            data.name.Center = true
+            data.name.Size = 13
+            data.name.Font = 2
+
+            -- Amount
+            data.amount.Outline = false
+            data.amount.Center = true
+            data.amount.Size = 11
+            data.amount.Color = Color3.fromRGB(200, 200, 200)
+
+            -- Box
+            data.box.Thickness = 1
+            data.box.Filled = false
+            data.box.Transparency = 0.8
+
+            itemDrawings[model] = data
         end
 
         local pos, vis = ItemCamera:WorldToViewportPoint(model.PickUpZone.Position)
+
         if vis then
-            local color  = getRarityColor(model)
-            if data.highlight then
-                data.highlight.FillColor    = color
-                data.highlight.OutlineColor = color
-                data.highlight.Enabled      = true
-            end
-            data.name.Color    = color
-            data.name.Position = Vector2.new(pos.X, pos.Y - 20)
-            data.name.Text     = model.Name
-            data.name.Visible  = true
+            local color = getRarityColor(model)
+
+            -- Box ESP
+            data.box.Size = Vector2.new(20, 20)
+            data.box.Position = Vector2.new(pos.X - 10, pos.Y - 10)
+            data.box.Color = color
+            data.box.Visible = true
+
+            -- Name
+            data.name.Color = color
+            data.name.Position = Vector2.new(pos.X, pos.Y - 18)
+            data.name.Text = model.Name
+            data.name.Visible = true
+
+            -- Amount
             local amt = model:GetAttribute("Amount") or 1
-            data.amount.Position = Vector2.new(pos.X, pos.Y + 15)
-            data.amount.Text     = amt > 1 and "[" .. tostring(amt) .. "]" or ""
-            data.amount.Visible  = amt > 1
+            data.amount.Position = Vector2.new(pos.X, pos.Y + 13)
+            data.amount.Text = amt > 1 and "[" .. tostring(amt) .. "]" or ""
+            data.amount.Visible = amt > 1
         end
     end
 end)
@@ -1457,10 +1479,15 @@ end)
 Players.PlayerRemoving:Connect(function(player)
     if player == LocalPlayer then
         for _, data in pairs(itemDrawings) do
-            pcall(function() data.name:Remove()        end)
-            pcall(function() data.amount:Remove()      end)
-            pcall(function() if data.highlight then data.highlight:Destroy() end end)
+            pcall(function() data.name:Remove() end)
+            pcall(function() data.amount:Remove() end)
+            pcall(function()
+                if data.box then
+                    data.box:Remove()
+                end
+            end)
         end
+
         itemDrawings = {}
     end
 end)
