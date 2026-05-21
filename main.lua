@@ -1531,10 +1531,21 @@ local function forceSetAttr(tool, attr, val)
     end
 end
 
+local function FindFireRateAttribute(gun)
+    if not gun then return "fire_rate" end
+    if gun:GetAttribute("fire_rate") ~= nil then return "fire_rate" end
+    for attrName in pairs(gun:GetAttributes()) do
+        if type(attrName) == "string" and attrName:sub(-3) == "486" then
+            return attrName
+        end
+    end
+    return "fire_rate"
+end
+
 local function applyGodGun(tool)
     if not tool or not isGunTool(tool) then return end
     pcall(function()
-        tool:SetAttribute("fire_rate",  getEnv().FireRateValue)
+        tool:SetAttribute(FindFireRateAttribute(tool), getEnv().FireRateValue)
         tool:SetAttribute("accuracy",   getEnv().AccuracyValue)
         tool:SetAttribute("Recoil",     getEnv().RecoilValue)
         tool:SetAttribute("Durability", getEnv().Durability)
@@ -1919,17 +1930,7 @@ WeaponTab:Slider({
     Title = "Fire Rate",
     Step  = 10,
     Value = { Min = 100, Max = 3000, Default = 1000 },
-    Callback = function(v)
-    getEnv().FireRateValue = v
-    local char = LocalPlayer.Character
-    if char then
-        for _, tool in ipairs(char:GetChildren()) do
-            if tool:IsA("Tool") and isGunTool(tool) then
-                pcall(function() tool:SetAttribute("fire_rate", v) end)
-            end
-        end
-    end
-end,
+    Callback = function(v) getEnv().FireRateValue = v end,
 })
 
 WeaponTab:Slider({
