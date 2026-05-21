@@ -1314,9 +1314,8 @@ local function createBillboardForPlayer(player)
     local info = getWeaponInfo(tool)
     if info then
         local lbl = Instance.new("TextLabel", gui)
-        lbl.Size                  = UDim2.new(0, 60, 0, 18)
-        lbl.BackgroundTransparency = 0.3
-        lbl.BackgroundColor3      = Color3.fromRGB(20, 20, 20)
+        lbl.Size                  = UDim2.new(0, 40, 0, 12)
+        lbl.BackgroundTransparency = 1
         lbl.Text                  = info.Name
         lbl.TextColor3            = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
         lbl.TextScaled            = true
