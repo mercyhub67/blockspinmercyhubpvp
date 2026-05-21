@@ -1365,7 +1365,7 @@ RunService.RenderStepped:Connect(function()
             if vis then
                 d.Text     = "[" .. info.Name .. "]"
                 d.Color    = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
-                d.Position = Vector2.new(pos.X, pos.Y - 12 + (idx * 13))
+                d.Position = Vector2.new(pos.X, pos.Y - 28 + (idx * 13))
                 d.Visible  = true
             else
                 d.Visible = false
