@@ -792,7 +792,7 @@ local function flickerAndMove()
             local root = getHRP()
             if root and underMapPos then
                 local angle = math.random() * math.pi * 2
-                local offset = Vector3.new(math.cos(angle), 0, math.sin(angle)) * 20
+                local offset = Vector3.new(math.cos(angle), 0, math.sin(angle)) * 10
                 root.CFrame = CFrame.new(underMapPos.Position + offset)
                 task.wait(0.05)
                 root.CFrame = underMapPos
