@@ -1362,15 +1362,14 @@ RunService.RenderStepped:Connect(function()
         local posHead, visHead = Camera:WorldToViewportPoint(head.Position)
         local posFoot, visFoot = Camera:WorldToViewportPoint(root.Position - Vector3.new(0, 3, 0))
 
-        -- ล็อคตำแหน่งใต้ระยะ โดยใช้ posHead เป็น anchor คงที่
-        local baseY = posHead.Y + 45
+        local baseY = posFoot.Y + 28
 
         for idx, info in ipairs(infos) do
             local d = data.drawings[idx]
-            if visHead then
+            if visFoot then
                 d.Text     = "[" .. info.Name .. "]"
                 d.Color    = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
-                d.Position = Vector2.new(posHead.X, baseY + (idx * 13))
+                d.Position = Vector2.new(posFoot.X, baseY + ((idx - 1) * 13))
                 d.Visible  = true
             else
                 d.Visible = false
