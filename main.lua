@@ -1311,19 +1311,22 @@ local function createBillboardForPlayer(player)
         if t:IsA("Tool") and t.Name ~= "Fists" then table.insert(tools, t) end
     end
     for _, tool in ipairs(tools) do
-        local info = getWeaponInfo(tool)
-        if info then
-            local img = Instance.new("ImageLabel", gui)
-            img.Size                  = UDim2.new(0, 20, 0, 20)
-            img.BackgroundTransparency = 0.1
-            img.Image                 = info.ImageId
-            img.BackgroundColor3      = Color3.fromRGB(240, 248, 255)
-            Instance.new("UICorner", img).CornerRadius = UDim.new(0, 10)
-            local stroke = Instance.new("UIStroke", img)
-            stroke.Color     = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
-            stroke.Thickness = 2
-        end
+    local info = getWeaponInfo(tool)
+    if info then
+        local lbl = Instance.new("TextLabel", gui)
+        lbl.Size                  = UDim2.new(0, 60, 0, 18)
+        lbl.BackgroundTransparency = 0.3
+        lbl.BackgroundColor3      = Color3.fromRGB(20, 20, 20)
+        lbl.Text                  = info.Name
+        lbl.TextColor3            = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
+        lbl.TextScaled            = true
+        lbl.Font                  = Enum.Font.GothamBold
+        Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 4)
+        local stroke = Instance.new("UIStroke", lbl)
+        stroke.Color     = Color3.fromRGB(0, 0, 0)
+        stroke.Thickness = 1
     end
+	end
     PlayerBillboards[player] = gui
 end
 
