@@ -1319,7 +1319,7 @@ local function createBillboardForPlayer(player)
         lbl.Text                  = info.Name
         lbl.TextColor3            = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
         lbl.TextScaled            = true
-        lbl.Font                  = Enum.Font.GothamBold
+        lbl.Font                  = Enum.Font.GothamBlack
         Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 4)
         local stroke = Instance.new("UIStroke", lbl)
         stroke.Color     = Color3.fromRGB(0, 0, 0)
