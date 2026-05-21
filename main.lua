@@ -1233,11 +1233,11 @@ end)
 local function registerItems(folder)
     for _, tool in ipairs(folder:GetChildren()) do
         if tool:IsA("Tool") then
-            local handle = tool:FindFirstChild("Handle")
+            local handle    = tool:FindFirstChild("Handle")
             local displayName = tool:GetAttribute("DisplayName") or tool.Name
-            local itemId = tool:GetAttribute("ItemId") or tool:GetAttribute("Id") or tool.Name
-            local rarity = tool:GetAttribute("RarityName") or "Common"
-            local imageId = tool:GetAttribute("ImageId") or "rbxassetid://7072725737"
+            local itemId    = tool:GetAttribute("ItemId") or tool:GetAttribute("Id") or tool.Name
+            local rarity    = tool:GetAttribute("RarityName") or "Common"
+            local imageId   = tool:GetAttribute("ImageId") or "rbxassetid://7072725737"
             local key
             if handle then
                 local mesh = handle:FindFirstChildOfClass("SpecialMesh")
@@ -1265,16 +1265,10 @@ local function getItemKey(tool)
     local rarity = tool:GetAttribute("RarityName") or "Common"
     if handle then
         local mesh = handle:FindFirstChildOfClass("SpecialMesh")
-        if mesh and mesh.MeshId ~= "" then
-            return mesh.MeshId .. (mesh.TextureId or "") .. "_RARITY_" .. rarity
-        end
-        if handle:IsA("MeshPart") and handle.MeshId ~= "" then
-            return handle.MeshId .. (handle.TextureID or "") .. "_RARITY_" .. rarity
-        end
+        if mesh and mesh.MeshId ~= "" then return mesh.MeshId .. (mesh.TextureId or "") .. "_RARITY_" .. rarity end
+        if handle:IsA("MeshPart") and handle.MeshId ~= "" then return handle.MeshId .. (handle.TextureID or "") .. "_RARITY_" .. rarity end
     end
-    if itemId and itemId ~= "" and itemId ~= tool.Name then
-        return "ITEMID_" .. itemId .. "_RARITY_" .. rarity
-    end
+    if itemId and itemId ~= "" and itemId ~= tool.Name then return "ITEMID_" .. itemId .. "_RARITY_" .. rarity end
     return "NAME_" .. displayName .. "_" .. tool.Name .. "_RARITY_" .. rarity
 end
 
@@ -1283,123 +1277,126 @@ local function getWeaponInfo(tool)
     return WeaponRegistry[getItemKey(tool)]
 end
 
--- สร้าง BillboardGui แสดงชื่ออาวุธใต้ตีน (แนวตั้ง 1 ชิ้นต่อบรรทัด)
-local function createBillboardForPlayer(player)
-    if not inventoryESPEnabled or player == game.Players.LocalPlayer then return end
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    
-    if PlayerBillboards[player] then
-        PlayerBillboards[player]:Destroy()
-        PlayerBillboards[player] = nil
-    end
-    
-    -- รวบรวมอาวุธทั้งหมด
+-- ── Inventory ESP (Drawing) ───────────────────────────────────
+local InventoryDrawings = {}
+
+local function getPlayerTools(player)
     local tools = {}
+    local char = player.Character
     for _, bagName in ipairs({"Backpack", "StarterGear", "StarterPack"}) do
         local bag = player:FindFirstChild(bagName)
         if bag then
             for _, t in ipairs(bag:GetChildren()) do
-                if t:IsA("Tool") and t.Name ~= "Fists" then
-                    table.insert(tools, t)
-                end
+                if t:IsA("Tool") and t.Name ~= "Fists" then table.insert(tools, t) end
             end
         end
     end
-    for _, t in ipairs(char:GetChildren()) do
-        if t:IsA("Tool") and t.Name ~= "Fists" then
-            table.insert(tools, t)
+    if char then
+        for _, t in ipairs(char:GetChildren()) do
+            if t:IsA("Tool") and t.Name ~= "Fists" then table.insert(tools, t) end
         end
     end
-    
-    -- ถ้าไม่มีอาวุธเลย ไม่ต้องสร้าง GUI
-    if #tools == 0 then return end
-    
-    -- คำนวณความสูงของ GUI ตามจำนวนอาวุธ (แต่ละบรรทัดสูงประมาณ 20)
-    local guiHeight = #tools * 16
-    local gui = Instance.new("BillboardGui")
-    gui.Adornee = root
-    gui.Size = UDim2.new(0, 140, 0, guiHeight)
-    gui.StudsOffset = Vector3.new(0, -6.5, 0)
-    gui.AlwaysOnTop = true
-    gui.Parent = char
-    
-    -- จัดเรียงแนวตั้ง
-    local layout = Instance.new("UIListLayout", gui)
-    layout.FillDirection = Enum.FillDirection.Vertical
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 2)
-    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    
-    -- สร้าง TextLabel แต่ละอาวุธ (ทีละบรรทัด)
-    for _, tool in ipairs(tools) do
-        local info = getWeaponInfo(tool)
-        if info then
-            local lbl = Instance.new("TextLabel", gui)
-            lbl.Size = UDim2.new(0, 0, 0, 10)
-            lbl.AutomaticSize = Enum.AutomaticSize.X
-            lbl.BackgroundTransparency = 1
-            lbl.Text = "[" .. info.Name .. "]"
-            lbl.TextColor3 = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
-            lbl.TextScaled = true
-            lbl.Font = Enum.Font.GothamBold
-        end
-    end
-    
-    PlayerBillboards[player] = gui
+    return tools
 end
 
--- ฟังก์ชันเปิด/ปิดระบบ
+local function clearInventoryDrawings(player)
+    local data = InventoryDrawings[player]
+    if data then
+        for _, d in ipairs(data.drawings) do
+            pcall(function() d:Remove() end)
+        end
+        InventoryDrawings[player] = nil
+    end
+end
+
+local function createBillboardForPlayer(player) end
+
 local function setInventoryESPEnabled(enabled)
     inventoryESPEnabled = enabled
-    if enabled then
+    if not enabled then
         for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= Players.LocalPlayer then
-                createBillboardForPlayer(player)
-            end
-        end
-    else
-        for _, gui in pairs(PlayerBillboards) do
-            gui:Destroy()
+            clearInventoryDrawings(player)
         end
         PlayerBillboards = {}
     end
 end
 
--- ลงทะเบียนไอเทม
+RunService.RenderStepped:Connect(function()
+    if not inventoryESPEnabled then
+        for player in pairs(InventoryDrawings) do
+            clearInventoryDrawings(player)
+        end
+        return
+    end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player == Players.LocalPlayer then continue end
+        local char = player.Character
+        if not char then clearInventoryDrawings(player) continue end
+        local head = char:FindFirstChild("Head")
+        if not head then clearInventoryDrawings(player) continue end
+
+        local tools  = getPlayerTools(player)
+        local infos  = {}
+        for _, tool in ipairs(tools) do
+            local info = getWeaponInfo(tool)
+            if info then table.insert(infos, info) end
+        end
+
+        if not InventoryDrawings[player] then
+            InventoryDrawings[player] = { drawings = {} }
+        end
+        local data = InventoryDrawings[player]
+
+        while #data.drawings < #infos do
+            local d = Drawing.new("Text")
+            d.Size    = 11
+            d.Center  = true
+            d.Outline = true
+            d.Font    = 4
+            d.Visible = false
+            table.insert(data.drawings, d)
+        end
+
+        local pos, vis = Camera:WorldToViewportPoint(head.Position)
+
+        for idx, info in ipairs(infos) do
+            local d = data.drawings[idx]
+            if vis then
+                d.Text     = "[" .. info.Name .. "]"
+                d.Color    = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
+                d.Position = Vector2.new(pos.X, pos.Y - 12 + (idx * 13))
+                d.Visible  = true
+            else
+                d.Visible = false
+            end
+        end
+
+        for idx = #infos + 1, #data.drawings do
+            data.drawings[idx].Visible = false
+        end
+    end
+end)
+
 for _, folderName in ipairs({"gun", "melee", "throwable", "consumable", "farming", "misc", "rod", "fish"}) do
     local folder = Items:FindFirstChild(folderName)
     if folder then registerItems(folder) end
 end
 
--- Event จัดการผู้เล่น
 Players.PlayerAdded:Connect(function(player)
-    if player ~= Players.LocalPlayer then
-        player.CharacterAdded:Connect(function()
-            task.wait(0.2)
-            if inventoryESPEnabled then
-                createBillboardForPlayer(player)
-            end
-        end)
-    end
+    player.CharacterAdded:Connect(function()
+        clearInventoryDrawings(player)
+    end)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
+    clearInventoryDrawings(player)
     if PlayerBillboards[player] then
         PlayerBillboards[player]:Destroy()
         PlayerBillboards[player] = nil
     end
 end)
 
--- เริ่มต้นสำหรับผู้เล่นที่มีอยู่แล้ว
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= Players.LocalPlayer and player.Character then
-        task.wait(0.2)
-        createBillboardForPlayer(player)
-    end
-end
 
 -- ══════════════════════════════════════════════════════════════
 --  Dropped Items ESP
