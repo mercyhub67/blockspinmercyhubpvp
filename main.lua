@@ -1334,10 +1334,11 @@ RunService.RenderStepped:Connect(function()
         local char = player.Character
         if not char then clearInventoryDrawings(player) continue end
         local head = char:FindFirstChild("Head")
-        if not head then clearInventoryDrawings(player) continue end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if not head or not root then clearInventoryDrawings(player) continue end
 
-        local tools  = getPlayerTools(player)
-        local infos  = {}
+        local tools = getPlayerTools(player)
+        local infos = {}
         for _, tool in ipairs(tools) do
             local info = getWeaponInfo(tool)
             if info then table.insert(infos, info) end
@@ -1358,14 +1359,18 @@ RunService.RenderStepped:Connect(function()
             table.insert(data.drawings, d)
         end
 
-        local pos, vis = Camera:WorldToViewportPoint(head.Position)
+        local posHead, visHead = Camera:WorldToViewportPoint(head.Position)
+        local posFoot, visFoot = Camera:WorldToViewportPoint(root.Position - Vector3.new(0, 3, 0))
+
+        -- ล็อคตำแหน่งใต้ระยะ โดยใช้ posHead เป็น anchor คงที่
+        local baseY = posHead.Y + 45
 
         for idx, info in ipairs(infos) do
             local d = data.drawings[idx]
-            if vis then
+            if visHead then
                 d.Text     = "[" .. info.Name .. "]"
                 d.Color    = RarityColors[info.Rarity] or Color3.new(1, 1, 1)
-                d.Position = Vector2.new(pos.X, pos.Y - 28 + (idx * 13))
+                d.Position = Vector2.new(posHead.X, baseY + (idx * 13))
                 d.Visible  = true
             else
                 d.Visible = false
@@ -1396,7 +1401,6 @@ Players.PlayerRemoving:Connect(function(player)
         PlayerBillboards[player] = nil
     end
 end)
-
 
 -- ══════════════════════════════════════════════════════════════
 --  Dropped Items ESP
