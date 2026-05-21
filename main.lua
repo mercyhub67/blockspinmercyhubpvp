@@ -1919,7 +1919,17 @@ WeaponTab:Slider({
     Title = "Fire Rate",
     Step  = 10,
     Value = { Min = 100, Max = 3000, Default = 1000 },
-    Callback = function(v) getEnv().FireRateValue = v end,
+    Callback = function(v)
+    getEnv().FireRateValue = v
+    local char = LocalPlayer.Character
+    if char then
+        for _, tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") and isGunTool(tool) then
+                pcall(function() tool:SetAttribute("fire_rate", v) end)
+            end
+        end
+    end
+end,
 })
 
 WeaponTab:Slider({
