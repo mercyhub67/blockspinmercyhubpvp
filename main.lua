@@ -994,6 +994,7 @@ local function lockYPosition()
     snapConn = RunService.Heartbeat:Connect(function()
         if snapActive and snapY and HRP then
             local pos = HRP.Position
+				if math.abs(pos.Y - snapY) > 0.1 then
                 HRP.CFrame = CFrame.new(pos.X, snapY, pos.Z)
             end
         end
