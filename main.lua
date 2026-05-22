@@ -372,10 +372,6 @@ Players.PlayerRemoving:Connect(function(player)
     positionHistory[player] = nil
 end)
 
-local function getPing()
-    return math.clamp(Players.LocalPlayer:GetNetworkPing(), 0.06, 0.20)
-end
-
 local function calculateVelocity(player)
     local history = positionHistory[player]
     if not history or #history < 2 then return Vector3.new() end
