@@ -1216,7 +1216,7 @@ RunService.RenderStepped:Connect(function()
                     local pct  = hum.Health / math.max(hum.MaxHealth, 1)
                     local barW, barH = 45, 3
                     local barX = posHead.X - barW / 2
-                    local barY = posHead.Y + 3
+                    local barY = posHead.Y + 5
                     data.HpBg.Position = Vector2.new(barX, barY)
                     data.HpBg.Size     = Vector2.new(barW, barH)
                     data.HpBg.Visible  = true
@@ -1375,7 +1375,7 @@ RunService.RenderStepped:Connect(function()
         local posHead, visHead = Camera:WorldToViewportPoint(head.Position)
         local posFoot, visFoot = Camera:WorldToViewportPoint(root.Position - Vector3.new(0, 3, 0))
 
-        local baseY = posFoot.Y + 10
+        local baseY = posFoot.Y + 16
 
         for idx, info in ipairs(infos) do
             local d = data.drawings[idx]
