@@ -1216,7 +1216,7 @@ RunService.RenderStepped:Connect(function()
                     local pct  = hum.Health / math.max(hum.MaxHealth, 1)
                     local barW, barH = 45, 3
                     local barX = posHead.X - barW / 2
-                    local barY = posHead.Y - 13
+                    local barY = posHead.Y - 3
                     data.HpBg.Position = Vector2.new(barX, barY)
                     data.HpBg.Size     = Vector2.new(barW, barH)
                     data.HpBg.Visible  = true
