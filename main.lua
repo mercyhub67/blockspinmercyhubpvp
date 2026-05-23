@@ -1158,6 +1158,17 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
+local function getESPColor(player)
+    if aimTarget == player then
+        return Color3.fromRGB(255, 0, 0)
+    elseif player:GetAttribute("InSplashScreen") then
+        return Color3.fromRGB(0, 200, 255)
+    elseif player:GetAttribute("IsInSafeZone") then
+        return Color3.fromRGB(0, 255, 0)
+    end
+    return Color3.new(1, 1, 1)
+end
+
 RunService.RenderStepped:Connect(function()
     for player, data in pairs(ESP) do
         if player.Character then
@@ -1184,7 +1195,7 @@ RunService.RenderStepped:Connect(function()
                     data.Name.Visible  = true
                     data.Name.Text     = player.Name
                     data.Name.Position = Vector2.new(posHead.X, posHead.Y - 30)
-					data.Name.Color = (aimTarget == player) and Color3.fromRGB(255, 0, 0) or Color3.new(1, 1, 1)
+					data.Name.Color = getESPColor(player)
                 else
                     data.Name.Visible = false
                 end
@@ -1195,7 +1206,7 @@ RunService.RenderStepped:Connect(function()
                     data.Info.Visible  = true
                     data.Info.Text     = dist .. "M"
                     data.Info.Position = Vector2.new(posFoot.X, posFoot.Y + 15)
-					data.Info.Color = (aimTarget == player) and Color3.fromRGB(255, 0, 0) or Color3.new(1, 1, 1)
+					data.Info.Color = getESPColor(player)
                 else
                     data.Info.Visible = false
                 end
