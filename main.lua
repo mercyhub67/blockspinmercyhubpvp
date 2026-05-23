@@ -1194,7 +1194,7 @@ RunService.RenderStepped:Connect(function()
                 if nameESPEnabled and visHead then
                     data.Name.Visible  = true
                     data.Name.Text     = player.Name
-                    data.Name.Position = Vector2.new(posHead.X, posHead.Y - 30)
+                    data.Name.Position = Vector2.new(posHead.X, posHead.Y - 20)
 					data.Name.Color = getESPColor(player)
                 else
                     data.Name.Visible = false
@@ -1205,7 +1205,7 @@ RunService.RenderStepped:Connect(function()
                     local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - root.Position).Magnitude)
                     data.Info.Visible  = true
                     data.Info.Text     = dist .. "M"
-                    data.Info.Position = Vector2.new(posFoot.X, posFoot.Y + 15)
+                    data.Info.Position = Vector2.new(posFoot.X, posFoot.Y + 10)
 					data.Info.Color = getESPColor(player)
                 else
                     data.Info.Visible = false
@@ -1214,7 +1214,7 @@ RunService.RenderStepped:Connect(function()
                 -- Health Bar
                 if healthESPEnabled and visHead then
                     local pct  = hum.Health / math.max(hum.MaxHealth, 1)
-                    local barW, barH = 70, 5
+                    local barW, barH = 45, 3
                     local barX = posHead.X - barW / 2
                     local barY = posHead.Y - 16
                     data.HpBg.Position = Vector2.new(barX, barY)
@@ -1364,7 +1364,7 @@ RunService.RenderStepped:Connect(function()
 
         while #data.drawings < #infos do
             local d = Drawing.new("Text")
-            d.Size    = 11
+            d.Size    = 8
             d.Center  = true
             d.Outline = true
             d.Font    = 4
