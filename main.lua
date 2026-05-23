@@ -1355,7 +1355,7 @@ RunService.RenderStepped:Connect(function()
         local posHead, visHead = Camera:WorldToViewportPoint(head.Position)
         local posFoot, visFoot = Camera:WorldToViewportPoint(root.Position - Vector3.new(0, 3, 0))
 
-        local baseY = posFoot.Y + 16
+        local baseY = posFoot.Y + 28
 
         for idx, info in ipairs(infos) do
             local d = data.drawings[idx]
