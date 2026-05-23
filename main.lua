@@ -1203,14 +1203,14 @@ RunService.RenderStepped:Connect(function()
                 -- Distance
                 if distanceESPEnabled and visFoot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - root.Position).Magnitude)
-                    data.Info.Visible  = true
                     local pct = math.floor(hum.Health / math.max(hum.MaxHealth, 1) * 100)
-data.Info.Text = "HP " .. math.floor(hum.Health) .. " " .. pct .. "% | " .. dist .. "M"
+                    data.Info.Visible  = true
+                    data.Info.Text     = pct .. "% | " .. dist .. "M"
                     data.Info.Position = Vector2.new(posFoot.X, posFoot.Y + 10)
-					data.Info.Color = getESPColor(player)
+                    data.Info.Color    = getESPColor(player)
                 else
                     data.Info.Visible = false
-					end	
+					end
             else
                 data.Highlight.Enabled = false
                 data.Name.Visible      = false
