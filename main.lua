@@ -1204,37 +1204,17 @@ RunService.RenderStepped:Connect(function()
                 if distanceESPEnabled and visFoot and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     local dist = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - root.Position).Magnitude)
                     data.Info.Visible  = true
-                    data.Info.Text     = dist .. "M"
+                    local pct = math.floor(hum.Health / math.max(hum.MaxHealth, 1) * 100)
+data.Info.Text = "HP " .. math.floor(hum.Health) .. " " .. pct .. "% | " .. dist .. "M"
                     data.Info.Position = Vector2.new(posFoot.X, posFoot.Y + 10)
 					data.Info.Color = getESPColor(player)
                 else
                     data.Info.Visible = false
-                end
-
-                -- Health Bar
-                if healthESPEnabled and visHead then
-                    local pct  = hum.Health / math.max(hum.MaxHealth, 1)
-                    local barW, barH = 45, 3
-                    local barX = posHead.X - barW / 2
-                    local barY = posHead.Y + 5
-                    data.HpBg.Position = Vector2.new(barX, barY)
-                    data.HpBg.Size     = Vector2.new(barW, barH)
-                    data.HpBg.Visible  = true
-                    data.HpBar.Position = Vector2.new(barX, barY)
-                    data.HpBar.Size     = Vector2.new(barW * pct, barH)
-                    data.HpBar.Color    = Color3.fromHSV(pct * 0.333, 0.8, 0.9)
-                    data.HpBar.Visible  = true
-                else
-                    data.HpBg.Visible  = false
-                    data.HpBar.Visible = false
-                end
-
+					end	
             else
                 data.Highlight.Enabled = false
                 data.Name.Visible      = false
                 data.Info.Visible      = false
-                data.HpBar.Visible     = false
-                data.HpBg.Visible      = false
             end
         end
     end
