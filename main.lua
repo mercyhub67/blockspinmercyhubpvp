@@ -165,7 +165,7 @@ redLine.Transparency  = 1
 redLine.Visible       = false
 
 -- ── Global env helper ────────────────────────────────────────
-local getEnv = getgenv or function() return _G end
+local getEnv = (type(getgenv) == "function" and getgenv) or function() return _G end
 
 getEnv().Sky        = false
 getEnv().SkyAmount  = 1500
@@ -833,7 +833,7 @@ RunService.Heartbeat:Connect(function()
             if root and root.Parent then
                 root.Velocity = prevVel
             end
-        )
+        end)  -- ← ตรงนี้ขาด ) ไปหนึ่งอัน
     end
 end)
 
