@@ -1436,9 +1436,9 @@ end
 -- ส่วน UI (WindUI)
 local v206 = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))():CreateWindow({
     Icon = "https://cdn.discordapp.com/attachments/1379297032568569909/1436623861826457600/93_20251108144920-removebg-preview.png?ex=691047bb&is=690ef63b&hm=0eb04f3e5adc7857237b8f13ed6a4d86864f42aec99e055cc9289ce22a04aed2&",
-    Title = "Zenith Hub",
+    Title = "Mercy Hub",
     Icon = "rbxassetid://81469999547026",
-    Author = "by #yugiC",
+    Author = "by #Golfeiei",
     Folder = "zenith",
     Size = UDim2.fromOffset(400, 400),
     MinSize = Vector2.new(560, 350),
