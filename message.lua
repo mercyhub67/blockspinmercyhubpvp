@@ -844,19 +844,13 @@ function Sf:Drive(model, destination, value, t)
             movedDist = math.min(dt * speed, dist)
             local newPos = startPos + dir * movedDist
             
-            -- 🔁 คำนวณทิศทางการเคลื่อนที่จริง (จากตำแหน่งก่อนหน้า)
             local currentPos = model:GetPivot().Position
-            local moveDirection = (newPos - currentPos).Unit
-            if moveDirection.Magnitude < 0.01 then
-                moveDirection = dir
-            end
-            
-            -- 🎯 คำนวณมุม Yaw และหมุนรถตามทิศทางเคลื่อนที่
-            local yaw = math.atan2(moveDirection.X, moveDirection.Z)
-            local oldYaw = model:GetPivot().Rotation.Y
-            local smoothYaw = oldYaw + (yaw - oldYaw) * 0.3   -- ปรับความนุ่มนวล
-            local newCFrame = CFrame.new(newPos) * CFrame.Angles(0, smoothYaw, 0)
-            model:PivotTo(newCFrame)
+local moveDelta = newPos - currentPos
+local moveDirection = moveDelta.Magnitude > 0.01 and moveDelta.Unit or dir
+
+local lookTarget = newPos + Vector3.new(moveDirection.X, 0, moveDirection.Z)
+local newCFrame = CFrame.lookAt(newPos, lookTarget)
+model:PivotTo(newCFrame)
             
             -- รีเซ็ตความเร็ว
             for _, part in ipairs(model:GetDescendants()) do
