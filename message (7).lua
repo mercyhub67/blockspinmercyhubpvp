@@ -1273,13 +1273,12 @@ func['AutoFarmATM'] = function()
                                     end
                                     do
                                         Humanoid.Sit = false
-                                        task.wait()
-                                        local atmPos = closestATM.Area.Position
-                                        RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
-                                        RootPart.Anchored = false
-                                        if c().EnabledDespoit and Sf:GetMoney() > 0 then
-                                            Net.get("transfer_funds", "hand", "bank", Sf:GetMoney())
-                                            task.wait(0)
+local vehicleSeat = vehicle:FindFirstChildOfClass("VehicleSeat")
+if vehicleSeat then vehicleSeat:RemoveOccupant() end
+task.wait(0.3)
+local atmPos = closestATM.Area.Position
+if Sf:dist(closestATM.Area) > 10 then
+    RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
                                         end
                                         if not Sf:CheckingIsMinigame() and c().AutoFarmATM then
                                             Sf:Ac("request_begin_hacking_3", closestATM, currentHackTool)
