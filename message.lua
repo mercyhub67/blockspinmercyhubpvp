@@ -845,11 +845,12 @@ function Sf:Drive(model, destination, value, t)
             local newPos = startPos + dir * movedDist
             
             local currentPos = model:GetPivot().Position
+local currentPos = model:GetPivot().Position
 local moveDelta = newPos - currentPos
 local moveDirection = moveDelta.Magnitude > 0.01 and moveDelta.Unit or dir
 
 local lookTarget = newPos + Vector3.new(moveDirection.X, 0, moveDirection.Z)
-local newCFrame = CFrame.lookAt(newPos, lookTarget) * CFrame.Angles(0, math.pi, 0)
+local newCFrame = CFrame.lookAt(newPos, lookTarget)
 model:PivotTo(newCFrame)
             
             -- รีเซ็ตความเร็ว
@@ -1273,9 +1274,15 @@ func['AutoFarmATM'] = function()
                                     end
                                     do
                                         Humanoid.Sit = false
-                                        task.wait()
-                                        local atmPos = closestATM.Area.Position
-                                        RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
+local exitWait = 0
+while Humanoid.Sit and exitWait < 20 do
+    Humanoid.Sit = false
+    task.wait(0.1)
+    exitWait = exitWait + 1
+end
+task.wait(0.2)
+local atmPos = closestATM.Area.Position
+RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
                                         RootPart.Anchored = false
                                         if c().EnabledDespoit and Sf:GetMoney() > 0 then
                                             Net.get("transfer_funds", "hand", "bank", Sf:GetMoney())
