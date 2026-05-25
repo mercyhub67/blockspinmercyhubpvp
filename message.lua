@@ -499,16 +499,16 @@ function Sf:GetChipPrice(d)
 end
 
 function Sf:ForceStop()
-    if c()['Running'] then
-        c()["StopWalking"] = true
-        task.wait()
-        if c()["StopWalking"] then
-            task.wait()
-            c()["StopWalking"] = false
-        end
+    c()["StopWalking"] = true
+    c()["AutoFarmATM"] = false
+    local timeout = 0
+    while c()['Running'] and timeout < 30 do
+        task.wait(0.1)
+        timeout = timeout + 1
     end
+    c()["StopWalking"] = false
+    c()['Running'] = false
 end
-
 function Sf:GetMoney()
     return tonumber(PlayerGui.TopRightHud.Holder.Frame.MoneyTextLabel.Text:match("%$(%d+)"))
 end
@@ -807,7 +807,7 @@ function Sf:Drive(model, destination, value, t)
         local startTime = tick()
         local lastPos = startPos  -- เก็บตำแหน่งก่อนหน้าเพื่อคำนวณทิศทางเคลื่อนที่
         
-        while movedDist < dist and shouldContinue(value) do
+        while movedDist < dist and shouldContinue(value) and c().AutoFarmATM do
             task.wait()
             if not model or not model.PrimaryPart then
                 c()['Running'] = false
@@ -816,7 +816,7 @@ function Sf:Drive(model, destination, value, t)
             end
             c()['Running'] = true
             
-            if not shouldContinue(value) then
+            if not shouldContinue(value) or not c().AutoFarmATM then
                 c()['Running'] = false
                 ClearPathLines()
                 break
@@ -849,7 +849,7 @@ local moveDelta = newPos - currentPos
 local moveDirection = moveDelta.Magnitude > 0.01 and moveDelta.Unit or dir
 
 local lookTarget = newPos + Vector3.new(moveDirection.X, 0, moveDirection.Z)
-local newCFrame = CFrame.lookAt(newPos, lookTarget)
+local newCFrame = CFrame.lookAt(newPos, lookTarget) * CFrame.Angles(0, math.pi, 0)
 model:PivotTo(newCFrame)
             
             -- รีเซ็ตความเร็ว
@@ -866,7 +866,7 @@ model:PivotTo(newCFrame)
         end
         
         c()['Running'] = false
-        if not shouldContinue(value) then
+        if not shouldContinue(value) or not c().AutoFarmATM then
             ClearPathLines()
             break
         end
