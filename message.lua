@@ -1274,15 +1274,10 @@ func['AutoFarmATM'] = function()
                                     end
                                     do
                                         Humanoid.Sit = false
-local exitWait = 0
-while Humanoid.Sit and exitWait < 20 do
-    Humanoid.Sit = false
-    task.wait(0.1)
-    exitWait = exitWait + 1
-end
-task.wait(0.2)
-local atmPos = closestATM.Area.Position
-RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
+                                        local vehicleSeat = vehicle:FindFirstChildOfClass("VehicleSeat")
+                                        if vehicleSeat then vehicleSeat:RemoveOccupant() end
+                                        task.wait(0.3)
+                                        local atmPos = closestATM.Area.Position
                                         RootPart.Anchored = false
                                         if c().EnabledDespoit and Sf:GetMoney() > 0 then
                                             Net.get("transfer_funds", "hand", "bank", Sf:GetMoney())
