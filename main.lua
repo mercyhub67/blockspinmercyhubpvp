@@ -60,49 +60,49 @@ local CharModule    = require(ReplicatedStorage.Modules.Core.Char)
 local Items         = ReplicatedStorage:WaitForChild("Items")
 local MeleeItems    = Items:WaitForChild("melee")
 
--- ── Local Player / Character ──────────────────────────────────
-local LocalPlayer  = Players.LocalPlayer
-local Character    = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid     = Character:WaitForChild("Humanoid")
-local HRP          = Character:WaitForChild("HumanoidRootPart")
-local Camera       = Workspace.CurrentCamera
+-- ── ผู้เล่น/ตัวละครในพื้นที่ ──────────────────────────────────
+ผู้เล่นท้องถิ่น = ผู้เล่นท้องถิ่น LocalPlayer  = Players.LocalPlayer
+ตัวละครท้องถิ่น = ตัวละครผู้เล่นท้องถิ่น หรือ ตัวละครผู้เล่นท้องถิ่นที่เพิ่มเข้ามา: รอ() Character    = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+ฮิวแมนอยด์ท้องถิ่น = ตัวละคร:รอรับลูก("ฮิวแมนอยด์") Humanoid     = Character:WaitForChild("Humanoid")
+HRP ท้องถิ่น = ตัวละคร:รอรับลูก("HumanoidRootPart") HRP          = Character:WaitForChild("HumanoidRootPart")
+กล้องภายในเครื่อง = กล้องปัจจุบันของพื้นที่ทำงาน Camera       = Workspace.CurrentCamera
 
--- ── Misc Setup ───────────────────────────────────────────────
-local isMobile        = false
-local DroppedItems    = Workspace:WaitForChild("DroppedItems")
-local itemDrawings    = {}    -- DroppedItem ESP drawings
-local espData         = {}    -- Player ESP data
-local positionHistory = {}    -- Velocity prediction history
-local WeaponRegistry  = {}    -- Registered weapon info
-local PlayerBillboards = {}   -- Inventory billboard GUIs
-local highlightTable  = {}    -- Player highlights
-local excludedPlayers = {}    -- Whitelist table
-local itemPickupTrack = {}    -- Last pickup time per item
-local originalAttribs = {}    -- Saved melee attributes
+-- ── การตั้งค่าอื่นๆ ─────────────────────────────────────────────
+local isMobile = false isMobile        = false
+local DroppedItems = Workspace:WaitForChild("DroppedItems") DroppedItems    = Workspace:WaitForChild("DroppedItems")
+local itemDrawings = {} -- ภาพวาด ESP ของ DroppedItem itemDrawings    = {}    -- DroppedItem ESP drawings
+local espData = {} -- ข้อมูล ESP ของผู้เล่น espData         = {}    -- Player ESP data
+local positionHistory = {} -- ประวัติการทำนายความเร็ว positionHistory = {}    -- Velocity prediction history
+local WeaponRegistry = {} -- ข้อมูลอาวุธที่ลงทะเบียน WeaponRegistry  = {}    -- Registered weapon info
+local PlayerBillboards = {} -- GUI ป้ายโฆษณาสินค้าคงคลัง PlayerBillboards = {}   -- Inventory billboard GUIs
+ตารางไฮไลต์เฉพาะที่ = {} -- ไฮไลต์ของผู้เล่น highlightTable  = {}    -- Player highlights
+ผู้เล่นที่ถูกยกเว้นในเครื่อง = {} -- ตารางรายชื่อผู้เล่นที่อนุญาต excludedPlayers = {}    -- Whitelist table
+local itemPickupTrack = {} -- เวลารับสินค้าครั้งสุดท้ายต่อรายการ itemPickupTrack = {}    -- Last pickup time per item
+local originalAttribs = {} -- คุณสมบัติการโจมตีระยะประชิดที่บันทึกไว้ originalAttribs = {}    -- Saved melee attributes
 
--- ── State Variables ──────────────────────────────────────────
-local silentAimEnabled    = false
-local redLineLockEnabled  = false
-local fovRadius           = 120
-local targetPlayer        = nil
-local aimTarget           = nil
+-- ── ตัวแปรสถานะ ─────────────────────────────────────────
+local silentAimEnabled = false silentAimEnabled    = false
+local redLineLockEnabled = false redLineLockEnabled  = false
+รัศมี fov เฉพาะที่ = 120 fovRadius           = 120
+local targetPlayer = nil targetPlayer        = nil
+เป้าหมายท้องถิ่น = nil aimTarget           = nil
 
-local nameESPEnabled      = false
-local distanceESPEnabled  = false
-local healthESPEnabled    = false
-local inventoryESPEnabled = false
-local highlightEnabled    = false
+ชื่อท้องถิ่น ESPEnabled = false nameESPEnabled      = false
+ระยะทางท้องถิ่น ESPEnabled = false distanceESPEnabled  = false
+เปิดใช้งานสุขภาพท้องถิ่น = เท็จ healthESPEnabled    = false
+สินค้าคงคลังในพื้นที่ ESPEnabled = false inventoryESPEnabled = false
+local highlightEnabled = false highlightEnabled    = false
 
-local walkSpeedEnabled    = false
-local speedMultiplier     = 0.05
-local jumpPowerEnabled    = false
+local walkSpeedEnabled = false walkSpeedEnabled    = false
+ตัวคูณความเร็วท้องถิ่น = 0.05 speedMultiplier     = 0.05
+เปิดใช้งานพลังงานกระโดดในพื้นที่ = เท็จ jumpPowerEnabled    = false
 
-local infiniteStaminaEnabled = false
-local antiLockEnabled     = false
-local antiKillEnabled     = false  -- "enabled" global
-local autoPickupEnabled   = false
-local antiRagdollEnabled  = false
-local autoRespawnEnabled  = false
+local infiniteStaminaEnabled = false infiniteStaminaEnabled = false
+local antiLockEnabled = false antiLockEnabled     = false
+local antiKillEnabled = false -- "เปิดใช้งาน" global antiKillEnabled     = false  -- "enabled" global
+เปิดใช้งานการรับอัตโนมัติในพื้นที่ = เท็จ autoPickupEnabled   = false
+local antiRagdollEnabled = false antiRagdollEnabled  = false
+local autoRespawnEnabled = false autoRespawnEnabled  = false
 local autoFinishEnabled   = false
 local meleeAuraEnabled    = false
 local autoAttackEnabled   = false
