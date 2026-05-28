@@ -241,6 +241,7 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
+local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MercyToggleGui"
 ScreenGui.ResetOnSpawn = false
