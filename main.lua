@@ -241,10 +241,16 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MercyToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(38, 38)
-ToggleBtn.Position = UDim2.new(0.5, -19, 0, 8)
+ToggleBtn.Size = UDim2.fromOffset(40, 40)
+ToggleBtn.Position = UDim2.new(0.5, -20, 0, 16)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
 ToggleBtn.BorderSizePixel = 0
 ToggleBtn.Image = "rbxassetid://133253457738939"
@@ -262,46 +268,58 @@ Stroke.Thickness = 2
 Stroke.Parent = ToggleBtn
 
 local dragging = false
-local dragStart = nil
-local startPos = nil
-local hasDragged = false
+local dragStartPos
+local btnStartPos
+local moved = false
 
 ToggleBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
-        hasDragged = false
-        dragStart = input.Position
-        startPos = ToggleBtn.Position
+        moved = false
+        dragStartPos = input.Position
+        btnStartPos = ToggleBtn.Position
     end
 end)
 
 ToggleBtn.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.Touch
-    or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - dragStart
-        if delta.Magnitude > 5 then hasDragged = true end
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStartPos
+        if delta.Magnitude > 4 then moved = true end
         ToggleBtn.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
+            btnStartPos.X.Scale,
+            btnStartPos.X.Offset + delta.X,
+            btnStartPos.Y.Scale,
+            btnStartPos.Y.Offset + delta.Y
         )
     end
 end)
 
 ToggleBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
-        if not hasDragged then
+
+        if not moved then
             TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = UDim2.fromOffset(30, 30),
+                Size = UDim2.fromOffset(32, 32),
+                Position = UDim2.new(
+                    ToggleBtn.Position.X.Scale,
+                    ToggleBtn.Position.X.Offset + 4,
+                    ToggleBtn.Position.Y.Scale,
+                    ToggleBtn.Position.Y.Offset + 4
+                ),
             }):Play()
             task.wait(0.09)
             TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = UDim2.fromOffset(38, 38),
+                Size = UDim2.fromOffset(40, 40),
+                Position = UDim2.new(
+                    ToggleBtn.Position.X.Scale,
+                    ToggleBtn.Position.X.Offset - 4,
+                    ToggleBtn.Position.Y.Scale,
+                    ToggleBtn.Position.Y.Offset - 4
+                ),
             }):Play()
+            task.wait(0.05)
+
             if Window and Window.Toggle then
                 Window:Toggle()
             end
@@ -310,12 +328,7 @@ ToggleBtn.InputEnded:Connect(function(input)
 end)
 
 local ConfigManager = Window.ConfigManager
-local Config = ConfigManager and ConfigManager:CreateConfig("CathubConfig") or {
-    Register = function() end,
-    Load = function() end,
-    Save = function() end,
-    Delete = function() end,
-}
+local Config        = ConfigManager:CreateConfig("CathubConfig")
 
 -- ── Send Remote reference ─────────────────────────────────────
 local SendRemote
