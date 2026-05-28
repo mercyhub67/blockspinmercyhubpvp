@@ -241,7 +241,6 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
-local TweenService = game:GetService("TweenService")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MercyToggleGui"
 ScreenGui.ResetOnSpawn = false
@@ -250,8 +249,8 @@ ScreenGui.Parent = game:GetService("CoreGui")
 
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(40, 40)
-ToggleBtn.Position = UDim2.new(0.5, -20, 0, 16)
+ToggleBtn.Size = UDim2.fromOffset(56, 56)
+ToggleBtn.Position = UDim2.new(0, 16, 0.5, -28)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
 ToggleBtn.BorderSizePixel = 0
 ToggleBtn.Image = "rbxassetid://133253457738939"
@@ -259,72 +258,34 @@ ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.ImageTransparency = 0
 ToggleBtn.Parent = ScreenGui
 
+-- ตัดมุม
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 10)
+Corner.CornerRadius = UDim.new(0, 14)
 Corner.Parent = ToggleBtn
 
+-- เส้นขอบ glow
 local Stroke = Instance.new("UIStroke")
 Stroke.Color = Color3.fromRGB(120, 60, 220)
 Stroke.Thickness = 2
 Stroke.Parent = ToggleBtn
 
-local dragging = false
-local dragStartPos
-local btnStartPos
-local moved = false
-
-ToggleBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        moved = false
-        dragStartPos = input.Position
-        btnStartPos = ToggleBtn.Position
-    end
-end)
-
-ToggleBtn.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStartPos
-        if delta.Magnitude > 4 then moved = true end
-        ToggleBtn.Position = UDim2.new(
-            btnStartPos.X.Scale,
-            btnStartPos.X.Offset + delta.X,
-            btnStartPos.Y.Scale,
-            btnStartPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-ToggleBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-
-        if not moved then
-            TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = UDim2.fromOffset(32, 32),
-                Position = UDim2.new(
-                    ToggleBtn.Position.X.Scale,
-                    ToggleBtn.Position.X.Offset + 4,
-                    ToggleBtn.Position.Y.Scale,
-                    ToggleBtn.Position.Y.Offset + 4
-                ),
-            }):Play()
-            task.wait(0.09)
-            TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = UDim2.fromOffset(40, 40),
-                Position = UDim2.new(
-                    ToggleBtn.Position.X.Scale,
-                    ToggleBtn.Position.X.Offset - 4,
-                    ToggleBtn.Position.Y.Scale,
-                    ToggleBtn.Position.Y.Offset - 4
-                ),
-            }):Play()
-            task.wait(0.05)
-
-            if Window and Window.Toggle then
-                Window:Toggle()
-            end
-        end
+-- animation กด
+ToggleBtn.MouseButton1Click:Connect(function()
+    -- shrink
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(46, 46),
+        Position = UDim2.new(0, 21, 0.5, -23),
+    }):Play()
+    task.wait(0.09)
+    -- bounce back
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(56, 56),
+        Position = UDim2.new(0, 16, 0.5, -28),
+    }):Play()
+    task.wait(0.05)
+    -- toggle window
+    if Window and Window.Toggle then
+        Window:Toggle()
     end
 end)
 
