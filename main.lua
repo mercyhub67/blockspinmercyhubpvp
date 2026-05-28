@@ -249,8 +249,8 @@ ScreenGui.Parent = game:GetService("CoreGui")
 
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(56, 56)
-ToggleBtn.Position = UDim2.new(0, 16, 0.5, -28)
+ToggleBtn.Size = UDim2.fromOffset(38, 38)
+ToggleBtn.Position = UDim2.new(0.5, -20, 0, 16)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
 ToggleBtn.BorderSizePixel = 0
 ToggleBtn.Image = "rbxassetid://133253457738939"
