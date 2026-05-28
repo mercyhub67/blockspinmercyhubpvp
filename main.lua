@@ -310,7 +310,12 @@ ToggleBtn.InputEnded:Connect(function(input)
 end)
 
 local ConfigManager = Window.ConfigManager
-local Config        = ConfigManager:CreateConfig("CathubConfig")
+local Config = ConfigManager and ConfigManager:CreateConfig("CathubConfig") or {
+    Register = function() end,
+    Load = function() end,
+    Save = function() end,
+    Delete = function() end,
+}
 
 -- ── Send Remote reference ─────────────────────────────────────
 local SendRemote
