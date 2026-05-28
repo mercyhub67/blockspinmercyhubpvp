@@ -279,10 +279,10 @@ ToggleBtn.MouseButton1Click:Connect(function()
     task.wait(0.09)
     -- bounce back
     TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(56, 56),
-        Position = UDim2.new(0, 16, 0.5, -28),
+        Size = UDim2.fromOffset(38, 38),
+        Position = UDim2.new(0.5, -20, 0, 16),
     }):Play()
-    task.wait(0.05)
+    task.wait(0.5)
     -- toggle window
     if Window and Window.Toggle then
         Window:Toggle()
