@@ -222,6 +222,20 @@ if WindUI then
         Color  = Color3.fromHex("#30ff6a"),
         Radius = 12,
     })
+	
+	task.defer(function()
+    for _, gui in ipairs(game:GetService("CoreGui"):GetChildren()) do
+        if gui.Name == "WindUI" or gui.Name == "Wind" then
+            for _, obj in ipairs(gui:GetDescendants()) do
+                if obj:IsA("ImageButton") or obj:IsA("TextButton") then
+                    if obj.Size == UDim2.fromOffset(40,40) or obj.Size == UDim2.fromOffset(32,32) then
+                        obj.Visible = false
+                    end
+                end
+            end
+        end
+    end
+end)
 else
     Window = {
         Tab = function()
