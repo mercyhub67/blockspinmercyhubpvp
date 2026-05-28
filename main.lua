@@ -402,12 +402,27 @@ local function predictPosition(part, root)
     local player = parentModel and Players:GetPlayerFromCharacter(parentModel)
     local velocity = (player and calculateVelocity(player)) or Vector3.zero
 
-    local ping   = math.clamp(getPing(), 0.06, 0.35)
+    local pingHistory = {}
+local function getSmoothedPing()
+    table.insert(pingHistory, getPing())
+    if #pingHistory > 5 then table.remove(pingHistory, 1) end
+    local sum = 0
+    for _, v in ipairs(pingHistory) do sum = sum + v end
+    return sum / #pingHistory
+end
+
+local ping = math.clamp(getSmoothedPing(), 0.06, 0.50)
 local aimPos = predictPosition(head, root)
-if ping > 0.25 then
+
+if ping > 0.15 then
     local rootPred = predictPosition(root, root)
-    aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
-	end
+    local t = math.clamp((ping - 0.15) / 0.25, 0, 1)
+    t = t * t * (3 - 2 * t)
+    aimPos = aimPos:Lerp(rootPred, t)
+end
+
+local latencyOffset = ping * 0.4
+aimPos = aimPos + Vector3.new(0, latencyOffset, 0)
 
     -- speed แนวนอนเท่านั้น (แม่นกว่า magnitude รวม Y)
     local hSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
