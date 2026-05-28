@@ -241,16 +241,10 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MercyToggleGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
-
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(56, 56)
-ToggleBtn.Position = UDim2.new(0, 16, 0.5, -28)
+ToggleBtn.Size = UDim2.fromOffset(38, 38)
+ToggleBtn.Position = UDim2.new(0.5, -19, 0, 8)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
 ToggleBtn.BorderSizePixel = 0
 ToggleBtn.Image = "rbxassetid://133253457738939"
@@ -258,34 +252,60 @@ ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.ImageTransparency = 0
 ToggleBtn.Parent = ScreenGui
 
--- ตัดมุม
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 14)
+Corner.CornerRadius = UDim.new(0, 10)
 Corner.Parent = ToggleBtn
 
--- เส้นขอบ glow
 local Stroke = Instance.new("UIStroke")
 Stroke.Color = Color3.fromRGB(120, 60, 220)
 Stroke.Thickness = 2
 Stroke.Parent = ToggleBtn
 
--- animation กด
-ToggleBtn.MouseButton1Click:Connect(function()
-    -- shrink
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Size = UDim2.fromOffset(46, 46),
-        Position = UDim2.new(0, 21, 0.5, -23),
-    }):Play()
-    task.wait(0.09)
-    -- bounce back
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(56, 56),
-        Position = UDim2.new(0, 16, 0.5, -28),
-    }):Play()
-    task.wait(0.05)
-    -- toggle window
-    if Window and Window.Toggle then
-        Window:Toggle()
+local dragging = false
+local dragStart = nil
+local startPos = nil
+local hasDragged = false
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        hasDragged = false
+        dragStart = input.Position
+        startPos = ToggleBtn.Position
+    end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch
+    or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - dragStart
+        if delta.Magnitude > 5 then hasDragged = true end
+        ToggleBtn.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+ToggleBtn.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch
+    or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+        if not hasDragged then
+            TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                Size = UDim2.fromOffset(30, 30),
+            }):Play()
+            task.wait(0.09)
+            TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.fromOffset(38, 38),
+            }):Play()
+            if Window and Window.Toggle then
+                Window:Toggle()
+            end
+        end
     end
 end)
 
