@@ -204,15 +204,17 @@ end)
 local Window
 if WindUI then
     Window = WindUI:CreateWindow({
-        Title      = "MERCY HUB  |  Block Spin🔫",
-        Icon = "rbxassetid://133253457738939",
-        Author     = "Block spin | Paid💵",
-        Folder     = "mercyhub",
-        Size       = UDim2.fromOffset(650, 400),
-        Theme      = "Violet",
+        Title       = "MERCY HUB  |  Block Spin🔫",
+        Icon        = "rbxassetid://133253457738939",
+        Author      = "Block spin | Paid💵",
+        Folder      = "mercyhub",
+        Size        = UDim2.fromOffset(650, 400),
+        Theme       = "Violet",
         Transparent = true,
-        Resizable  = true,
-        KeyCode    = Enum.KeyCode.G,
+        Resizable   = true,
+        KeyCode     = Enum.KeyCode.G,
+        -- ปิดปุ่ม open windui ตัวเดิม
+        ShowToggleButton = false,
     })
 
     Window:Tag({
@@ -221,20 +223,70 @@ if WindUI then
         Radius = 12,
     })
 else
-    -- Fallback stub so the rest of the script doesn't error
     Window = {
         Tab = function()
             return {
-                Section  = function() end,
-                Toggle   = function() end,
-                Slider   = function() end,
-                Button   = function() end,
-                Input    = function() return {} end,
-                Divider  = function() end,
+                Section = function() end,
+                Toggle  = function() end,
+                Slider  = function() end,
+                Button  = function() end,
+                Input   = function() return {} end,
+                Divider = function() end,
             }
         end,
     }
 end
+
+-- ══════════════════════════════════════════════════════════════
+--  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
+-- ══════════════════════════════════════════════════════════════
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MercyToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Size = UDim2.fromOffset(56, 56)
+ToggleBtn.Position = UDim2.new(0, 16, 0.5, -28)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Image = "rbxassetid://133253457738939"
+ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.ImageTransparency = 0
+ToggleBtn.Parent = ScreenGui
+
+-- ตัดมุม
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 14)
+Corner.Parent = ToggleBtn
+
+-- เส้นขอบ glow
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(120, 60, 220)
+Stroke.Thickness = 2
+Stroke.Parent = ToggleBtn
+
+-- animation กด
+ToggleBtn.MouseButton1Click:Connect(function()
+    -- shrink
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(46, 46),
+        Position = UDim2.new(0, 21, 0.5, -23),
+    }):Play()
+    task.wait(0.09)
+    -- bounce back
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(56, 56),
+        Position = UDim2.new(0, 16, 0.5, -28),
+    }):Play()
+    task.wait(0.05)
+    -- toggle window
+    if Window and Window.Toggle then
+        Window:Toggle()
+    end
+end)
 
 local ConfigManager = Window.ConfigManager
 local Config        = ConfigManager:CreateConfig("CathubConfig")
