@@ -204,17 +204,18 @@ end)
 local Window
 if WindUI then
     Window = WindUI:CreateWindow({
-        Title       = "MERCY HUB  |  Block Spin🔫",
-        Icon        = "rbxassetid://133253457738939",
-        Author      = "Block spin | Paid💵",
-        Folder      = "mercyhub",
-        Size        = UDim2.fromOffset(650, 400),
-        Theme       = "Violet",
+        Title      = "MERCY HUB  |  Block Spin🔫",
+        Icon = "rbxassetid://133253457738939",
+        Author     = "Block spin | Paid💵",
+        Folder     = "mercyhub",
+        Size       = UDim2.fromOffset(650, 400),
+        Theme      = "Violet",
         Transparent = true,
-        Resizable   = true,
-        KeyCode     = Enum.KeyCode.G,
-        -- ปิดปุ่ม open windui ตัวเดิม
-        ShowToggleButton = false,
+        Resizable  = true,
+        KeyCode    = Enum.KeyCode.G,
+        OpenButton = {
+            Enabled = false
+        },
     })
 
     Window:Tag({
@@ -222,20 +223,6 @@ if WindUI then
         Color  = Color3.fromHex("#30ff6a"),
         Radius = 12,
     })
-	
-	task.defer(function()
-    for _, gui in ipairs(game:GetService("CoreGui"):GetChildren()) do
-        if gui.Name == "WindUI" or gui.Name == "Wind" then
-            for _, obj in ipairs(gui:GetDescendants()) do
-                if obj:IsA("ImageButton") or obj:IsA("TextButton") then
-                    if obj.Size == UDim2.fromOffset(40,40) or obj.Size == UDim2.fromOffset(32,32) then
-                        obj.Visible = false
-                    end
-                end
-            end
-        end
-    end
-end)
 else
     Window = {
         Tab = function()
