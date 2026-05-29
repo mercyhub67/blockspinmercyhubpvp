@@ -342,9 +342,11 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	task.wait(0.1)
 
 	-- toggle window
-	if Window and Window.Toggle then
-		Window:Toggle()
-	end
+	if Window then
+    if Window.Enabled ~= nil then
+        Window.Enabled = not Window.Enabled
+    end
+		end
 end)
 
 local ConfigManager = Window.ConfigManager
