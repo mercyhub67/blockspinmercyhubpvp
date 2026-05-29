@@ -241,6 +241,9 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MercyToggleGui"
 ScreenGui.ResetOnSpawn = false
@@ -257,37 +260,91 @@ ToggleBtn.Image = "rbxassetid://118194721156015"
 ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.ImageTransparency = 0
 ToggleBtn.Parent = ScreenGui
-ToggleBtn.Draggable = true
 
--- ตัดมุม
+-- มุมโค้ง
 local Corner = Instance.new("UICorner")
 Corner.CornerRadius = UDim.new(0, 14)
 Corner.Parent = ToggleBtn
 
--- เส้นขอบ glow
+-- ขอบเรืองแสง
 local Stroke = Instance.new("UIStroke")
 Stroke.Color = Color3.fromRGB(120, 60, 220)
 Stroke.Thickness = 2
 Stroke.Parent = ToggleBtn
 
+-- ลากปุ่มได้
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		dragging = true
+		dragStart = input.Position
+		startPos = ToggleBtn.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input == dragInput then
+		local delta = input.Position - dragStart
+
+		ToggleBtn.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
 -- animation กด
 ToggleBtn.MouseButton1Click:Connect(function()
-    -- shrink
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Size = UDim2.fromOffset(46, 46),
-        Position = UDim2.new(0.5, -20, 0, 16),
-    }):Play()
-    task.wait(0.09)
-    -- bounce back
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(38, 38),
-        Position = UDim2.new(0.5, -20, 0, 16),
-    }):Play()
-    task.wait(0.5)
-    -- toggle window
-    if Window and Window.Toggle then
-        Window:Toggle()
-    end
+
+	local oldPos = ToggleBtn.Position
+
+	-- ขยาย
+	TweenService:Create(
+		ToggleBtn,
+		TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{
+			Size = UDim2.fromOffset(46, 46)
+		}
+	):Play()
+
+	task.wait(0.09)
+
+	-- เด้งกลับ
+	TweenService:Create(
+		ToggleBtn,
+		TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.fromOffset(38, 38)
+		}
+	):Play()
+
+	task.wait(0.1)
+
+	-- toggle window
+	if Window and Window.Toggle then
+		Window:Toggle()
+	end
 end)
 
 local ConfigManager = Window.ConfigManager
