@@ -204,38 +204,25 @@ end)
 local Window
 if WindUI then
     Window = WindUI:CreateWindow({
-        Title      = "MERCY HUB  |  Block Spin🔫",
+        Title = "MERCY HUB  |  Block Spin🔫",
         Icon = "rbxassetid://118194721156015",
-        Author     = "Block spin | Paid💵",
-        Folder     = "mercyhub",
-        Size       = UDim2.fromOffset(650, 400),
-        Theme      = "Violet",
+        Author = "Block spin | Paid💵",
+        Folder = "mercyhub",
+        Size = UDim2.fromOffset(650, 400),
+        Theme = "Violet",
         Transparent = true,
-        Resizable  = true,
-        KeyCode    = Enum.KeyCode.G,
+        Resizable = true,
+        KeyCode = Enum.KeyCode.G,
         OpenButton = {
             Enabled = false
         },
     })
 
     Window:Tag({
-        Title  = "v5.6",
-        Color  = Color3.fromHex("#30ff6a"),
+        Title = "v5.6",
+        Color = Color3.fromHex("#30ff6a"),
         Radius = 12,
     })
-else
-    Window = {
-        Tab = function()
-            return {
-                Section = function() end,
-                Toggle  = function() end,
-                Slider  = function() end,
-                Button  = function() end,
-                Input   = function() return {} end,
-                Divider = function() end,
-            }
-        end,
-    }
 end
 
 local Players = game:GetService("Players")
