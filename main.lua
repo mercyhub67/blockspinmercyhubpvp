@@ -241,91 +241,48 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
-local TweenService = game:GetService("TweenService")
+Window:SetBackgroundTransparency(0.25)
+Window:SetBackgroundImageTransparency(0.25)
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MercyToggleGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "NM_Toggle"
 
-local ToggleBtn = Instance.new("ImageButton")
-ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(38, 38)
-ToggleBtn.Position = UDim2.new(0, 12, 0.5, -19)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
-ToggleBtn.BorderSizePixel = 0
-ToggleBtn.Image = "rbxassetid://133253457738939"
-ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.ImageTransparency = 0
-ToggleBtn.Parent = ScreenGui
+local ICON_ID = "rbxassetid://72830195117719"
 
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 14)
-Corner.Parent = ToggleBtn
+local btn = Instance.new("ImageButton")
+btn.Parent = gui
+btn.Size = UDim2.fromOffset(42, 42)
+btn.Position = UDim2.fromOffset(40, 220)
+btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+btn.Image = ICON_ID
+btn.ScaleType = Enum.ScaleType.Fit
+btn.ImageTransparency = 0
+btn.AutoButtonColor = false
+btn.Active = true
+btn.Draggable = true
+btn.AnchorPoint = Vector2.new(0.5, 0.5)
 
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(120, 60, 220)
-Stroke.Thickness = 2
-Stroke.Parent = ToggleBtn
+local corner = Instance.new("UICorner", btn)
+corner.CornerRadius = UDim.new(0, 10)
 
--- ── Drag ─────────────────────────────────────────────────────
-local dragging  = false
-local dragStart = nil
-local startPos  = nil
-local moved     = false
+local stroke = Instance.new("UIStroke", btn)
+stroke.Thickness = 1
+stroke.Color = Color3.fromRGB(180, 180, 180)
 
-ToggleBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging  = true
-        moved     = false
-        dragStart = input.Position
-        startPos  = ToggleBtn.Position
+local pad = Instance.new("UIPadding", btn)
+pad.PaddingTop    = UDim.new(0, 6)
+pad.PaddingBottom = UDim.new(0, 6)
+pad.PaddingLeft   = UDim.new(0, 6)
+pad.PaddingRight  = UDim.new(0, 6)
+
+local guiOpen = true
+btn.MouseButton1Click:Connect(function()
+    guiOpen = not guiOpen
+    if guiOpen then
+        Window:Show()
+    else
+        Window:Hide()
     end
-end)
-
-ToggleBtn.InputChanged:Connect(function(input)
-    if dragging and (
-        input.UserInputType == Enum.UserInputType.Touch
-        or input.UserInputType == Enum.UserInputType.MouseMovement
-    ) then
-        local delta = input.Position - dragStart
-        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
-            moved = true
-        end
-        ToggleBtn.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-ToggleBtn.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch
-    or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- ── Click (กดแล้วไม่ได้ลาก) ──────────────────────────────────
-ToggleBtn.MouseButton1Click:Connect(function()
-    if moved then return end
-
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Size = UDim2.fromOffset(46, 46),
-    }):Play()
-    task.wait(0.09)
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.fromOffset(38, 38),
-    }):Play()
-    task.wait(0.15)
-
-    pcall(function()
-    if Window and Window.Toggle then
-        Window:Toggle()
-    end
-end)
 end)
 
 local ConfigManager = Window.ConfigManager
