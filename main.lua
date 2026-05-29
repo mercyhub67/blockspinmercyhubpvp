@@ -1163,16 +1163,12 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 local function getESPColor(player)
-    local inSafe      = player:GetAttribute("IsInSafeZone")
-    local inSplash    = player:GetAttribute("InSplashScreen")
-    local justSpawned = playerSpawnTime[player] and (tick() - playerSpawnTime[player]) < 8
-
-    if inSplash or justSpawned then
-        return Color3.fromRGB(0, 200, 255)
-    elseif inSafe then
-        return Color3.fromRGB(0, 255, 0)
-    elseif aimTarget == player then
+    if aimTarget == player then
         return Color3.fromRGB(255, 0, 0)
+    elseif player:GetAttribute("InSplashScreen") then
+        return Color3.fromRGB(0, 200, 255)
+    elseif player:GetAttribute("IsInSafeZone") then
+        return Color3.fromRGB(0, 255, 0)
     end
     return Color3.new(1, 1, 1)
 end
