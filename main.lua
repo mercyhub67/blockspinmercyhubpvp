@@ -238,53 +238,72 @@ else
     }
 end
 
--- ══════════════════════════════════════════════════════════════
---  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
--- ══════════════════════════════════════════════════════════════
-local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MercyToggleGui"
+ScreenGui.Name = "ToggleUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 999999
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Parent = CoreGui
 
-local ToggleBtn = Instance.new("ImageButton")
-ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Size = UDim2.fromOffset(38, 38)
-ToggleBtn.Position = UDim2.new(0.5, -20, 0, 16)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
-ToggleBtn.BorderSizePixel = 0
-ToggleBtn.Image = "rbxassetid://118194721156015"
-ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.ImageTransparency = 0
-ToggleBtn.Parent = ScreenGui
+local Button = Instance.new("ImageButton")
+Button.Size = UDim2.new(0,50,0,50)
+Button.Position = UDim2.new(0.5,-25,0.5,-25)
+Button.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Button.Image = "rbxassetid://118194721156015"
+Button.AutoButtonColor = false
+Button.ZIndex = 999999
+Button.Parent = ScreenGui
 
--- มุมโค้ง
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 14)
-Corner.Parent = ToggleBtn
+Corner.CornerRadius = UDim.new(0,10)
+Corner.Parent = Button
 
--- ขอบเรืองแสง
 local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(120, 60, 220)
-Stroke.Thickness = 2
-Stroke.Parent = ToggleBtn
+Stroke.Color = Color3.fromRGB(120,80,255)
+Stroke.Thickness = 1.5
+Stroke.Parent = Button
 
--- ลากปุ่มได้
+local normalSize = UDim2.new(0,50,0,50)
+local clickSize = UDim2.new(0,44,0,44)
+
+Button.MouseButton1Down:Connect(function()
+	TweenService:Create(
+		Button,
+		TweenInfo.new(0.08),
+		{Size = clickSize}
+	):Play()
+end)
+
+Button.MouseButton1Up:Connect(function()
+	TweenService:Create(
+		Button,
+		TweenInfo.new(0.08),
+		{Size = normalSize}
+	):Play()
+end)
+
+Button.MouseButton1Click:Connect(function()
+	if Window and Window.Toggle then
+		Window:Toggle()
+	end
+end)
+
 local dragging = false
-local dragInput
 local dragStart
 local startPos
 
-ToggleBtn.InputBegan:Connect(function(input)
+Button.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1
 	or input.UserInputType == Enum.UserInputType.Touch then
 
 		dragging = true
 		dragStart = input.Position
-		startPos = ToggleBtn.Position
+		startPos = Button.Position
 
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
@@ -294,59 +313,21 @@ ToggleBtn.InputBegan:Connect(function(input)
 	end
 end)
 
-ToggleBtn.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement
-	or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
 UIS.InputChanged:Connect(function(input)
-	if dragging and input == dragInput then
+	if dragging and (
+		input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch
+	) then
+
 		local delta = input.Position - dragStart
 
-		ToggleBtn.Position = UDim2.new(
+		Button.Position = UDim2.new(
 			startPos.X.Scale,
 			startPos.X.Offset + delta.X,
 			startPos.Y.Scale,
 			startPos.Y.Offset + delta.Y
 		)
 	end
-end)
-
--- animation กด
-ToggleBtn.MouseButton1Click:Connect(function()
-
-	local oldPos = ToggleBtn.Position
-
-	-- ขยาย
-	TweenService:Create(
-		ToggleBtn,
-		TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-		{
-			Size = UDim2.fromOffset(46, 46)
-		}
-	):Play()
-
-	task.wait(0.09)
-
-	-- เด้งกลับ
-	TweenService:Create(
-		ToggleBtn,
-		TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-		{
-			Size = UDim2.fromOffset(38, 38)
-		}
-	):Play()
-
-	task.wait(0.1)
-
-	-- toggle window
-	if Window then
-    if Window.Enabled ~= nil then
-        Window.Enabled = not Window.Enabled
-    end
-		end
 end)
 
 local ConfigManager = Window.ConfigManager
