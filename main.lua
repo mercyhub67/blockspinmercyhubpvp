@@ -241,18 +241,10 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
-local TweenService = game:GetService("TweenService")
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MercyToggleGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
-
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Name = "ToggleBtn"
 ToggleBtn.Size = UDim2.fromOffset(38, 38)
-ToggleBtn.Position = UDim2.new(0.5, -19, 0, 16)
+ToggleBtn.Position = UDim2.new(0.5, -19, 0, 8)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
 ToggleBtn.BorderSizePixel = 0
 ToggleBtn.Image = "rbxassetid://133253457738939"
@@ -261,7 +253,7 @@ ToggleBtn.ImageTransparency = 0
 ToggleBtn.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 14)
+Corner.CornerRadius = UDim.new(0, 10)
 Corner.Parent = ToggleBtn
 
 local Stroke = Instance.new("UIStroke")
@@ -286,10 +278,8 @@ ToggleBtn.InputBegan:Connect(function(input)
 end)
 
 ToggleBtn.InputChanged:Connect(function(input)
-    if dragging and (
-        input.UserInputType == Enum.UserInputType.Touch
-        or input.UserInputType == Enum.UserInputType.MouseMovement
-    ) then
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch
+    or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - dragStart
         if delta.Magnitude > 5 then moved = true end
         ToggleBtn.Position = UDim2.new(
@@ -315,7 +305,12 @@ ToggleBtn.InputEnded:Connect(function(input)
                 Position = curPos,
             }):Play()
             task.wait(0.15)
-            print("กด toggle!")
+            guiOpen = not guiOpen
+            if guiOpen then
+                Window:Show()
+            else
+                Window:Hide()
+            end
         end
     end
 end)
