@@ -230,11 +230,24 @@ local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
+local Hidden = false
+local MainUI
+
+task.wait(1)
+
+for _,v in pairs(CoreGui:GetChildren()) do
+	if v:IsA("ScreenGui") and v.Name ~= "ToggleUI" then
+		if v:FindFirstChildWhichIsA("Frame", true) then
+			MainUI = v
+		end
+	end
+end
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ToggleUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder = 999999
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = CoreGui
 
 local Button = Instance.new("ImageButton")
@@ -243,7 +256,6 @@ Button.Position = UDim2.new(0.5,-25,0.5,-25)
 Button.BackgroundColor3 = Color3.fromRGB(35,35,35)
 Button.Image = "rbxassetid://118194721156015"
 Button.AutoButtonColor = false
-Button.ZIndex = 999999
 Button.Parent = ScreenGui
 
 local Corner = Instance.new("UICorner")
@@ -275,8 +287,19 @@ Button.MouseButton1Up:Connect(function()
 end)
 
 Button.MouseButton1Click:Connect(function()
-	if Window and Window.Toggle then
-		Window:Toggle()
+	Hidden = not Hidden
+
+	if MainUI then
+		for _,x in pairs(MainUI:GetDescendants()) do
+			if x:IsA("Frame")
+			or x:IsA("TextLabel")
+			or x:IsA("TextButton")
+			or x:IsA("ImageLabel")
+			or x:IsA("ImageButton")
+			or x:IsA("ScrollingFrame") then
+				x.Visible = not Hidden
+			end
+		end
 	end
 end)
 
@@ -316,6 +339,7 @@ UIS.InputChanged:Connect(function(input)
 		)
 	end
 end)
+
 
 local ConfigManager = Window.ConfigManager
 local Config        = ConfigManager:CreateConfig("CathubConfig")
