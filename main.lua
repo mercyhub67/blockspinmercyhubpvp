@@ -241,47 +241,51 @@ end
 -- ══════════════════════════════════════════════════════════════
 --  Custom Toggle Button (สี่เหลี่ยมตัดมุม + โลโก้ + animation)
 -- ══════════════════════════════════════════════════════════════
-Window:SetBackgroundTransparency(0.25)
-Window:SetBackgroundImageTransparency(0.25)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MercyToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
 
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "NM_Toggle"
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Size = UDim2.fromOffset(38, 38)
+ToggleBtn.Position = UDim2.new(0.5, -20, 0, 16)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Image = "rbxassetid://133253457738939"
+ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.ImageTransparency = 0
+ToggleBtn.Parent = ScreenGui
 
-local ICON_ID = "rbxassetid://72830195117719"
+-- ตัดมุม
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 14)
+Corner.Parent = ToggleBtn
 
-local btn = Instance.new("ImageButton")
-btn.Parent = gui
-btn.Size = UDim2.fromOffset(42, 42)
-btn.Position = UDim2.fromOffset(40, 220)
-btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-btn.Image = ICON_ID
-btn.ScaleType = Enum.ScaleType.Fit
-btn.ImageTransparency = 0
-btn.AutoButtonColor = false
-btn.Active = true
-btn.Draggable = true
-btn.AnchorPoint = Vector2.new(0.5, 0.5)
+-- เส้นขอบ glow
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(120, 60, 220)
+Stroke.Thickness = 2
+Stroke.Parent = ToggleBtn
 
-local corner = Instance.new("UICorner", btn)
-corner.CornerRadius = UDim.new(0, 10)
-
-local stroke = Instance.new("UIStroke", btn)
-stroke.Thickness = 1
-stroke.Color = Color3.fromRGB(180, 180, 180)
-
-local pad = Instance.new("UIPadding", btn)
-pad.PaddingTop    = UDim.new(0, 6)
-pad.PaddingBottom = UDim.new(0, 6)
-pad.PaddingLeft   = UDim.new(0, 6)
-pad.PaddingRight  = UDim.new(0, 6)
-
-local guiOpen = true
-btn.MouseButton1Click:Connect(function()
-    guiOpen = not guiOpen
-    if guiOpen then
-        Window:Show()
-    else
-        Window:Hide()
+-- animation กด
+ToggleBtn.MouseButton1Click:Connect(function()
+    -- shrink
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(46, 46),
+        Position = UDim2.new(0, 21, 0.5, -23),
+    }):Play()
+    task.wait(0.09)
+    -- bounce back
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(38, 38),
+        Position = UDim2.new(0.5, -20, 0, 16),
+    }):Play()
+    task.wait(0.5)
+    -- toggle window
+    if Window and Window.Toggle then
+        Window:Toggle()
     end
 end)
 
