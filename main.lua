@@ -560,7 +560,7 @@ if SendRemote and SendRemote.FireServer then
                 local root = aimTarget.Character and aimTarget.Character:FindFirstChild("HumanoidRootPart")
                 local hum  = aimTarget.Character and aimTarget.Character:FindFirstChild("Humanoid")
                 if head and root and hum then
-                    local aimPos     = predictPosition(head, root)
+                    local aimPos = head.Position
                     local myHead     = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
                     local originPos  = myHead and myHead.Position or nil
 
