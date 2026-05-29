@@ -656,11 +656,12 @@ end
 -- ══════════════════════════════════════════════════════════════
 RunService.RenderStepped:Connect(function()
     pcall(function()
+
         if redLineLockEnabled then
             aimTarget = getClosestTarget()
         end
-        aimTarget = (silentAimEnabled or redLineLockEnabled) and getClosestTarget() or nil
 
+        aimTarget = (silentAimEnabled or redLineLockEnabled) and getClosestTarget() or nil
         local closestPlayer = getClosestTarget()
 
         -- FOV circle
@@ -668,85 +669,58 @@ RunService.RenderStepped:Connect(function()
             if isMobile then
                 fovCircle.Visible = silentAimEnabled
                 fovCircle.Position = UDim2.fromScale(0.5, 0.5)
-                fovCircle.Size     = UDim2.fromOffset(fovRadius * 2, fovRadius * 2)
+                fovCircle.Size = UDim2.fromOffset(fovRadius * 2, fovRadius * 2)
             else
                 local Center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
                 local t = tick()
+
                 for i = 1, fovCircle._segments do
                     local angle1 = math.rad((i - 1) * (360 / fovCircle._segments))
                     local angle2 = math.rad(i * (360 / fovCircle._segments))
+
                     fovCircle._lines[i].From = Center + Vector2.new(math.cos(angle1) * fovRadius, math.sin(angle1) * fovRadius)
                     fovCircle._lines[i].To   = Center + Vector2.new(math.cos(angle2) * fovRadius, math.sin(angle2) * fovRadius)
-                    -- Rainbow: hue shifts over time and around the circle
+
                     fovCircle._lines[i].Color = Color3.fromHSV(((i / fovCircle._segments) + t * 0.5) % 1, 1, 1)
                     fovCircle._lines[i].Visible = silentAimEnabled
                 end
             end
-				end
+        end
 
-        -- Tracer / Red Line
+        -- Tracer / Red Line (ยังอยู่)
         if closestPlayer and closestPlayer.Character then
             local char = closestPlayer.Character
             local hum  = char:FindFirstChild("Humanoid")
+
             local aimPart = (SelectedAimPart == "HumanoidRootPart")
                 and char:FindFirstChild("HumanoidRootPart")
-                or  char:FindFirstChild("Head")
+                or char:FindFirstChild("Head")
 
             if hum and hum.Health > 0 and aimPart then
                 local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
                 smoothTarget = smoothTarget:Lerp(aimPart.Position, SMOOTH_MULT)
                 local screenPos, visible = Camera:WorldToViewportPoint(smoothTarget)
 
                 if visible then
                     redLine.Visible = true
-                    redLine.From    = center
-                    redLine.To      = Vector2.new(screenPos.X, screenPos.Y)
-                    redLine.Color   = Color3.fromRGB(255, 50, 50)
+                    redLine.From = center
+                    redLine.To = Vector2.new(screenPos.X, screenPos.Y)
+                    redLine.Color = Color3.fromRGB(255, 50, 50)
                     redLine.Thickness = 1.3
-
-                    -- Diamond crosshair
-                    if not tracerLines then
-                        tracerLines = {}
-                        for i = 1, 4 do
-                            tracerLines[i]           = Drawing.new("Line")
-                            tracerLines[i].Color     = Color3.fromRGB(255, 255, 255)
-                            tracerLines[i].Thickness = 1.2
-                            tracerLines[i].Visible   = true
-                        end
-                    end
-                    local top    = Camera:WorldToViewportPoint(aimPart.Position + Vector3.new(0,  0.5, 0))
-                    local bottom = Camera:WorldToViewportPoint(aimPart.Position - Vector3.new(0,  0.5, 0))
-                    local cx, cy = screenPos.X, screenPos.Y
-                    local halfH  = math.clamp((Vector2.new(top.X, top.Y) - Vector2.new(bottom.X, bottom.Y)).Magnitude / 2, 8, 25)
-                    local halfW  = halfH
-
-                    tracerLines[1].From, tracerLines[1].To = Vector2.new(cx, cy - halfH), Vector2.new(cx + halfW, cy)
-                    tracerLines[2].From, tracerLines[2].To = Vector2.new(cx + halfW, cy), Vector2.new(cx, cy + halfH)
-                    tracerLines[3].From, tracerLines[3].To = Vector2.new(cx, cy + halfH), Vector2.new(cx - halfW, cy)
-                    tracerLines[4].From, tracerLines[4].To = Vector2.new(cx - halfW, cy), Vector2.new(cx, cy - halfH)
-                    for i = 1, 4 do tracerLines[i].Visible = true end
                 else
                     redLine.Visible = false
-                    if tracerLines then for i = 1, 4 do tracerLines[i].Visible = false end end
+                    smoothTarget = Vector3.new()
                 end
             else
                 redLine.Visible = false
-                if tracerLines then for i = 1, 4 do tracerLines[i].Visible = false end end
                 smoothTarget = Vector3.new()
             end
         else
             redLine.Visible = false
-            if tracerLines then for i = 1, 4 do tracerLines[i].Visible = false end end
             smoothTarget = Vector3.new()
         end
 
-        -- under-map lock
-        if snapActive and snapY and HRP then
-            local pos = HRP.Position
-            if math.abs(pos.Y - snapY) > 0.1 then
-                HRP.CFrame = CFrame.new(pos.X, snapY, pos.Z)
-            end
-        end
     end)
 end)
 
