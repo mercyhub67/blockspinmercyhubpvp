@@ -321,9 +321,11 @@ ToggleBtn.MouseButton1Click:Connect(function()
     }):Play()
     task.wait(0.15)
 
+    pcall(function()
     if Window and Window.Toggle then
         Window:Toggle()
     end
+end)
 end)
 
 local ConfigManager = Window.ConfigManager
