@@ -204,142 +204,37 @@ end)
 local Window
 if WindUI then
     Window = WindUI:CreateWindow({
-        Title = "MERCY HUB  |  Block Spin🔫",
-        Icon = "rbxassetid://118194721156015",
-        Author = "Block spin | Paid💵",
-        Folder = "mercyhub",
-        Size = UDim2.fromOffset(650, 400),
-        Theme = "Violet",
+        Title      = "MERCY HUB  |  Block Spin🔫",
+        Icon = "rbxassetid://133253457738939",
+        Author     = "Block spin | Paid💵",
+        Folder     = "mercyhub",
+        Size       = UDim2.fromOffset(650, 400),
+        Theme      = "Violet",
         Transparent = true,
-        Resizable = true,
-        KeyCode = Enum.KeyCode.G,
-        OpenButton = {
-            Enabled = false
-        },
+        Resizable  = true,
+        KeyCode    = Enum.KeyCode.G,
     })
 
     Window:Tag({
-        Title = "v5.6",
-        Color = Color3.fromHex("#30ff6a"),
+        Title  = "v5.6",
+        Color  = Color3.fromHex("#30ff6a"),
         Radius = 12,
     })
+else
+    -- Fallback stub so the rest of the script doesn't error
+    Window = {
+        Tab = function()
+            return {
+                Section  = function() end,
+                Toggle   = function() end,
+                Slider   = function() end,
+                Button   = function() end,
+                Input    = function() return {} end,
+                Divider  = function() end,
+            }
+        end,
+    }
 end
-
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-
-local Hidden = false
-local MainUI
-
-task.wait(1)
-
-for _,v in pairs(CoreGui:GetChildren()) do
-	if v:IsA("ScreenGui") and v.Name ~= "ToggleUI" then
-		if v:FindFirstChildWhichIsA("Frame", true) then
-			MainUI = v
-		end
-	end
-end
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ToggleUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.DisplayOrder = 999999
-ScreenGui.Parent = CoreGui
-
-local Button = Instance.new("ImageButton")
-Button.Size = UDim2.new(0,50,0,50)
-Button.Position = UDim2.new(0.5,-25,0.5,-25)
-Button.BackgroundColor3 = Color3.fromRGB(35,35,35)
-Button.Image = "rbxassetid://118194721156015"
-Button.AutoButtonColor = false
-Button.Parent = ScreenGui
-
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0,10)
-Corner.Parent = Button
-
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(120,80,255)
-Stroke.Thickness = 1.5
-Stroke.Parent = Button
-
-local normalSize = UDim2.new(0,50,0,50)
-local clickSize = UDim2.new(0,44,0,44)
-
-Button.MouseButton1Down:Connect(function()
-	TweenService:Create(
-		Button,
-		TweenInfo.new(0.08),
-		{Size = clickSize}
-	):Play()
-end)
-
-Button.MouseButton1Up:Connect(function()
-	TweenService:Create(
-		Button,
-		TweenInfo.new(0.08),
-		{Size = normalSize}
-	):Play()
-end)
-
-Button.MouseButton1Click:Connect(function()
-	Hidden = not Hidden
-
-	if MainUI then
-		for _,x in pairs(MainUI:GetDescendants()) do
-			if x:IsA("Frame")
-			or x:IsA("TextLabel")
-			or x:IsA("TextButton")
-			or x:IsA("ImageLabel")
-			or x:IsA("ImageButton")
-			or x:IsA("ScrollingFrame") then
-				x.Visible = not Hidden
-			end
-		end
-	end
-end)
-
-local dragging = false
-local dragStart
-local startPos
-
-Button.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-	or input.UserInputType == Enum.UserInputType.Touch then
-
-		dragging = true
-		dragStart = input.Position
-		startPos = Button.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if dragging and (
-		input.UserInputType == Enum.UserInputType.MouseMovement
-		or input.UserInputType == Enum.UserInputType.Touch
-	) then
-
-		local delta = input.Position - dragStart
-
-		Button.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
-end)
-
 
 local ConfigManager = Window.ConfigManager
 local Config        = ConfigManager:CreateConfig("CathubConfig")
