@@ -289,8 +289,6 @@ ToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-ทำไมแบบนี้ถึงติดขอเหตุผล
-
 local ConfigManager = Window.ConfigManager
 local Config        = ConfigManager:CreateConfig("CathubConfig")
 
