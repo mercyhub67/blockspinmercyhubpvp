@@ -257,6 +257,7 @@ ToggleBtn.Image = "rbxassetid://118194721156015"
 ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.ImageTransparency = 0
 ToggleBtn.Parent = ScreenGui
+ToggleBtn.Draggable = true
 
 -- ตัดมุม
 local Corner = Instance.new("UICorner")
