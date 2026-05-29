@@ -274,7 +274,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
     -- shrink
     TweenService:Create(ToggleBtn, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Size = UDim2.fromOffset(46, 46),
-        Position = UDim2.new(0, 21, 0.5, -23),
+        Position = UDim2.new(0.5, -23, 0, 13),
     }):Play()
     task.wait(0.09)
     -- bounce back
