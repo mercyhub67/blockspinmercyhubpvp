@@ -887,70 +887,7 @@ function Sf:Teleport(destination, value, t)
         return
     end
     
-    if path.Status == Enum.PathStatus.Success then
-        local waypoints = path:GetWaypoints()
-        for i = 1, #waypoints - 1 do
-            local startPos = waypoints[i].Position + Vector3.new(0, 3, 0)
-            local endPos = waypoints[i + 1].Position + Vector3.new(0, 3, 0)
-            DrawPathLine(startPos, endPos)
-        end
-        
-        for _, wp in pairs(waypoints) do
-            local offsetY = (wp.Action == Enum.PathWaypointAction.Jump) and 10 or 4
-            local targetPos = wp.Position + Vector3.new(0, offsetY, 0)
-            local startPos = RootPart.Position
-            local dir = (targetPos - startPos).Unit
-            local dist = (targetPos - startPos).Magnitude
-            local movedDist = 0
-            local speed = c().InstantTeleportSpeed or 30
-            local startTime = tick()
-            
-            while movedDist < dist and not c().StopWalking and shouldContinue(value) do
-                task.wait()
-                c()['Running'] = true
-                
-                if c().StopWalking or not shouldContinue(value) or Humanoid.Health <= 0 then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    break
-                end
-                
-                if self:Detect() then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    return self:Teleport(destination, value, t)
-                end
-                
-                if (t and t:GetAttribute(c().keys[3])) then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    break
-                end
-                
-                if t and self:CheckingIsMinigame() then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    return self:Teleport(destination, value, t)
-                end
-                
-                local elapsedTime = tick() - startTime
-                movedDist = math.min(elapsedTime * speed, dist)
-                local newPos = startPos + dir * movedDist
-                
-                if Humanoid.Sit then
-                    Humanoid.Sit = false
-                end
-                
-                RootPart:PivotTo(CFrame.new(newPos))
-                Sf:Ac("set_sprinting_1", true)
-            end
-            
-            c()['Running'] = false
-            if not shouldContinue(value) then
-                ClearPathLines()
-                break
-            end
-        end
+    
         
         ClearPathLines()
     end
