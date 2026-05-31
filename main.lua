@@ -213,6 +213,9 @@ if WindUI then
         Transparent = true,
         Resizable  = true,
         KeyCode    = Enum.KeyCode.G,
+		OpenButton = {  
+	Enabled = false  
+			}
     })
 
     Window:Tag({
@@ -235,6 +238,48 @@ else
         end,
     }
 end
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- GUI
+local IconGui = Instance.new("ScreenGui")
+IconGui.Name = "FloatingIcon"
+IconGui.ResetOnSpawn = false
+IconGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Frame
+local Frame = Instance.new("Frame")
+Frame.Parent = IconGui
+Frame.Size = UDim2.fromScale(0.09, 0.09)
+Frame.Position = UDim2.fromScale(0.05, 0.4)
+
+Frame.BackgroundColor3 = Color3.fromRGB(70,70,70)
+Frame.BackgroundTransparency = 0.35
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+
+-- Corner
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0,14)
+Corner.Parent = Frame
+
+-- Icon
+local Icon = Instance.new("ImageButton")
+Icon.Parent = Frame
+Icon.Size = UDim2.fromScale(0.8,0.8)
+Icon.Position = UDim2.fromScale(0.1,0.1)
+
+Icon.BackgroundTransparency = 1
+Icon.Image = "rbxassetid://100154960202028"
+Icon.AutoButtonColor = false
+Icon.Active = true
+
+-- Ratio
+local Ratio = Instance.new("UIAspectRatioConstraint")
+Ratio.AspectRatio = 1
+Ratio.Parent = Frame
 
 local ConfigManager = Window.ConfigManager
 local Config        = ConfigManager:CreateConfig("CathubConfig")
