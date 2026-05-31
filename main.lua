@@ -2817,3 +2817,26 @@ MiscTab:Button({
 })
 
 if Config.Load then Config.Load(Config) end
+
+local CollectionService = game:GetService("CollectionService")
+
+for _, tag in pairs(CollectionService:GetAllTags()) do
+    if tag:lower():find("door") then
+        for _, obj in pairs(CollectionService:GetTagged(tag)) do
+            pcall(function()
+                obj:Destroy()
+            end)
+        end
+    end
+end
+
+-- ลบจาก workspace ด้วย
+for _, obj in pairs(workspace:GetDescendants()) do
+    if obj.Name:lower():find("door") then
+        pcall(function()
+            obj:Destroy()
+        end)
+    end
+end
+
+print("ลบ Door ทั้งหมดแล้ว")
