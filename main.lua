@@ -604,25 +604,30 @@ if SendRemote and SendRemote.FireServer then
                         }}}
                     end
 
-                    -- Hit indicator beam
+                                        -- Hit indicator beam
                     pcall(function()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-    
-    local beam = Instance.new("Part")
-    beam.Anchored     = true
-    beam.CanCollide   = false
-    beam.Size         = Vector3.new(0.08, 0.08, (aimPos - head.Position).Magnitude)
-    beam.CFrame       = CFrame.new(head.Position, aimPos)
-                      * CFrame.new(0, 0, -beam.Size.Z / 2)
-    beam.Material     = Enum.Material.Neon
-    beam.Transparency = 0.35
-    beam.Color        = Color3.fromRGB(180, 0, 255)
-    beam.Parent       = Workspace
-    Debris:AddItem(beam, 0.5)
-end)
+                        local char = LocalPlayer.Character
+                        if not char then return end
+                        local myHead2 = char:FindFirstChild("Head")
+                        if not myHead2 then return end
+                        local beam = Instance.new("Part")
+                        beam.Anchored     = true
+                        beam.CanCollide   = false
+                        beam.Size         = Vector3.new(0.08, 0.08, (aimPos - myHead2.Position).Magnitude)
+                        beam.CFrame       = CFrame.new(myHead2.Position, aimPos)
+                                          * CFrame.new(0, 0, -beam.Size.Z / 2)
+                        beam.Material     = Enum.Material.Neon
+                        beam.Transparency = 0.35
+                        beam.Color        = Color3.fromRGB(180, 0, 255)
+                        beam.Parent       = Workspace
+                        Debris:AddItem(beam, 0.5)
+                    end)
+                end
+            end
+            return originalFireServer(self, unpack(args))
+        end)
+    end)
+end
 							
 -- ══════════════════════════════════════════════════════════════
 --  RenderStepped — Aim / FOV / Tracer
