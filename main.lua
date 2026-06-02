@@ -606,11 +606,16 @@ if SendRemote and SendRemote.FireServer then
 
                     -- Hit indicator beam
                     pcall(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    
     local beam = Instance.new("Part")
     beam.Anchored     = true
     beam.CanCollide   = false
-    beam.Size         = Vector3.new(0.08, 0.08, (aimPos - LocalPlayer.Character.Head.Position).Magnitude)
-    beam.CFrame       = CFrame.new(LocalPlayer.Character.Head.Position, aimPos)
+    beam.Size         = Vector3.new(0.08, 0.08, (aimPos - head.Position).Magnitude)
+    beam.CFrame       = CFrame.new(head.Position, aimPos)
                       * CFrame.new(0, 0, -beam.Size.Z / 2)
     beam.Material     = Enum.Material.Neon
     beam.Transparency = 0.35
