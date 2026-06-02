@@ -606,51 +606,19 @@ if SendRemote and SendRemote.FireServer then
 
                     -- Hit indicator beam
                     pcall(function()
-                        local beam = Instance.new("Part")
-                        beam.Anchored    = true
-                        beam.CanCollide  = false
-                        beam.Size        = Vector3.new(0.08, 0.08, (aimPos - LocalPlayer.Character.Head.Position).Magnitude)
-                        beam.CFrame      = CFrame.new(LocalPlayer.Character.Head.Position, aimPos)
-                                         * CFrame.new(0, 0, -beam.Size.Z / 2)
-                        beam.Material    = Enum.Material.Neon
-                        beam.Transparency = 0.35
-                        beam.Color       = Color3.fromRGB(255, 0, 0)
-                        beam.Parent      = Workspace
-                        Debris:AddItem(beam, 4)
-                        -- Color feedback on hit
-                        if hum then
-                            local prevHp = hum.Health
-                            spawn(function()
-                                wait(0.1)
-                                if hum and hum.Health < prevHp then
-                                    beam.Color = Color3.fromRGB(0, 255, 0)
-                                    -- Hit flash on target
-                                    for _, part in ipairs(aimTarget.Character:GetDescendants()) do
-                                        if part:IsA("BasePart") then
-                                            local flash = Instance.new("Part")
-                                            flash.Size        = part.Size + Vector3.new(0.05, 0.05, 0.05)
-                                            flash.CFrame      = part.CFrame
-                                            flash.Anchored    = true
-                                            flash.CanCollide  = false
-                                            flash.Material    = Enum.Material.Neon
-                                            flash.Color       = Color3.fromRGB(255, 0, 0)
-                                            flash.Transparency = 0.5
-                                            flash.Parent      = Workspace
-                                            TweenService:Create(flash, TweenInfo.new(1.5, Enum.EasingStyle.Linear), { Transparency = 1 }):Play()
-                                            Debris:AddItem(flash, 2)
-                                        end
-                                    end
-                                end
-                            end)
-                        end
-                    end)
-                end
-            end
-            return originalFireServer(self, unpack(args))
-        end)
-    end)
-end
-
+    local beam = Instance.new("Part")
+    beam.Anchored     = true
+    beam.CanCollide   = false
+    beam.Size         = Vector3.new(0.08, 0.08, (aimPos - LocalPlayer.Character.Head.Position).Magnitude)
+    beam.CFrame       = CFrame.new(LocalPlayer.Character.Head.Position, aimPos)
+                      * CFrame.new(0, 0, -beam.Size.Z / 2)
+    beam.Material     = Enum.Material.Neon
+    beam.Transparency = 0.35
+    beam.Color        = Color3.fromRGB(180, 0, 255)
+    beam.Parent       = Workspace
+    Debris:AddItem(beam, 0.5)
+end)
+							
 -- ══════════════════════════════════════════════════════════════
 --  RenderStepped — Aim / FOV / Tracer
 -- ══════════════════════════════════════════════════════════════
