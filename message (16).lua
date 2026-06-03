@@ -958,27 +958,70 @@ function Sf:Teleport(destination, value, t)
 end
 
 -- ✅ แก้ไขฟังก์ชัน Drive ให้ tween ตรง ๆ และหันหน้าไปตามทิศทางแม่นยำ (แบบฉบับ "โต้ด")
-function Sf:Drive(model, destination, value, t)
-    if not model or not model.PrimaryPart then
-        c()['Running'] = false
-        return
+function Sf:Teleport(destination, value, t)
+    c().StopWalking = false
+    c()['Running'] = true
+    ClearPathLines()
+    
+    local path = PathfindingService:CreatePath({
+        AgentCanJump = true,
+        AgentJumpHeight = 2.5,
+        AgentHeight = 8,
+        AgentRadius = 4.5,
+        AgentMaxSlope = 45
+    })
+    
+    pcall(function() path:ComputeAsync(RootPart.Position, destination) end)
+    
+    if path.Status == Enum.PathStatus.Success then
+        local waypoints = path:GetWaypoints()
+        for i = 1, #waypoints - 1 do
+            DrawPathLine(waypoints[i].Position + Vector3.new(0, 3, 0), waypoints[i + 1].Position + Vector3.new(0, 3, 0))
+        end
+        
+        for _, wp in pairs(waypoints) do
+            local offsetY = (wp.Action == Enum.PathWaypointAction.Jump) and 10 or 4
+            local targetPos = wp.Position + Vector3.new(0, offsetY, 0)
+            local startPos = RootPart.Position
+            local dir = (targetPos - startPos).Unit
+            local dist = (targetPos - startPos).Magnitude
+            local movedDist = 0
+            local speed = c().InstantTeleportSpeed or 30
+            local startTime = tick()
+            
+            while movedDist < dist and not c().StopWalking and shouldContinue(value) do
+                task.wait()
+                c()['Running'] = true
+                if c().StopWalking or not shouldContinue(value) or Humanoid.Health <= 0 then break end
+                if self:Detect() then
+                    ClearPathLines()
+                    return self:Teleport(destination, value, t)
+                end
+                
+                local elapsedTime = tick() - startTime
+                movedDist = math.min(elapsedTime * speed, dist)
+                RootPart:PivotTo(CFrame.new(startPos + dir * movedDist))
+                Sf:Ac("set_sprinting_1", true)
+            end
+            if not shouldContinue(value) then break end
+        end
     end
-    c()["StopWalking"] = false
+    c()['Running'] = false
+    ClearPathLines()
+end
+
+function Sf:Drive(model, destination, value, t)
+    if not model or not model.PrimaryPart then return end
+    c().StopWalking = false
     ClearPathLines()
 
     local path = PathfindingService:CreatePath({
-        AgentRadius = c().VechineType == "car" and 6 or 3.5,
+        AgentRadius = c().VechineType == "car" and 8 or 5.5, -- ขยายตัวรถให้หนาขึ้น ไม่เบียดมุม
         AgentHeight = 8,
         AgentCanJump = true,
         AgentMaxSlope = 50,
         AgentCanClimb = false,
-        WaypointSpacing = 8,
-        Costs = {
-            BlockedNode = 100,
-            Cars = 1,
-            Water = math.huge,
-            DoorArea = 1
-        }
+        WaypointSpacing = 6 -- ลดระยะห่างแต่ละจุดลง เพื่อให้ได้พิกัดเลี้ยวที่ละเอียดขึ้น ไม่เลี้ยวหักศอกกว้างเกินไป
     })
 
     local success = pcall(function()
@@ -1004,7 +1047,6 @@ function Sf:Drive(model, destination, value, t)
         DrawPathLine(startPos, endPos)
     end
 
-    -- วนลูปผ่านทุก waypoint
     for i, wp in pairs(waypoints) do
         if not model or not model.PrimaryPart then
             c()['Running'] = false
@@ -1012,15 +1054,18 @@ function Sf:Drive(model, destination, value, t)
             return
         end
 
-        local heightOffset = (wp.Action == Enum.PathWaypointAction.Jump) and 8 or 2
+        local isJump = (wp.Action == Enum.PathWaypointAction.Jump)
+        local heightOffset = isJump and 6 or 2.5
         local goalPos = wp.Position + Vector3.new(0, heightOffset, 0)
 
-        -- ระยะทางเริ่มต้นถึงเป้าหมาย
         local distToGoal = (goalPos - model:GetPivot().Position).Magnitude
-        local speed = c().InstantVechineSpeed or 55
+        local baseSpeed = c().InstantVechineSpeed or 55
         local startTime = tick()
 
-        -- เคลื่อนที่ไปยัง waypoint ปัจจุบัน (tween ตรง ๆ)
+        if isJump and Humanoid then
+            Humanoid.Jump = true
+        end
+
         while distToGoal > 0.5 and shouldContinue(value) do
             task.wait()
             if not model or not model.PrimaryPart then
@@ -1030,7 +1075,7 @@ function Sf:Drive(model, destination, value, t)
             end
             c()['Running'] = true
 
-            if not shouldContinue(value) then
+            if not shouldContinue(value) or not Humanoid.Sit then
                 c()['Running'] = false
                 ClearPathLines()
                 break
@@ -1042,26 +1087,27 @@ function Sf:Drive(model, destination, value, t)
                 return self:Drive(model, destination, value, t)
             end
 
-            if not Humanoid.Sit then
-                c()['Running'] = false
-                ClearPathLines()
-                return self:Drive(model, destination, value, t)
-            end
-
             if self:CheckingIsMinigame() or (t and t:GetAttribute(tostring(c().keys[3]))) then
                 c()['Running'] = false
                 ClearPathLines()
                 break
             end
 
-            -- คำนวณตำแหน่งใหม่โดยใช้ delta time
             local now = tick()
-            local dt = math.min(0.1, now - startTime)  -- ป้องกัน dt กระโดดสูงเกินไป
+            local dt = math.min(0.1, now - startTime)
             startTime = now
 
             local currentPos = model:GetPivot().Position
             local moveDelta = goalPos - currentPos
             local moveDirection = moveDelta.Unit
+            
+            -- [[ ส่วนที่แก้ไข: ป้องกันการบัคทะลุตอนจุดเลี้ยว ]]
+            -- ถ้ากำลังจะถึงจุดเลี้ยว (ระยะเหลือน้อย) ให้หน่วงความเร็วลงชั่วคราว เพื่อให้รถเลี้ยวโค้งมน ไม่พุ่งทะลุกำแพง
+            local speed = baseSpeed
+            if distToGoal < 4 then
+                speed = math.max(15, baseSpeed * 0.4) -- ลดความเร็วลง 60% ตอนเข้ามุมเลี้ยว
+            end
+
             local step = speed * dt
             local newPos
 
@@ -1073,18 +1119,19 @@ function Sf:Drive(model, destination, value, t)
                 distToGoal = (goalPos - newPos).Magnitude
             end
 
-            -- ✅ ตั้ง CFrame ให้หันหน้าไปตามทิศทางที่กำลังเคลื่อนที่ (ตรง ๆ ไม่นุ่มนวล)
+            -- หมุนหน้าตัวรถให้ตรงกับทิศทางที่จะไปก่อน เพื่อไม่ให้ข้างรถเบียดกำแพงตอนเปลี่ยนทิศทาง
             local lookTarget = newPos + moveDirection
             local newCFrame = CFrame.lookAt(newPos, lookTarget)
             model:PivotTo(newCFrame)
 
-            -- ปิด physics ของชิ้นส่วนรถเพื่อไม่ให้รบกวนการเคลื่อนที่แบบ tween
-            for _, part in ipairs(model:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Velocity = Vector3.zero
-                    part.RotVelocity = Vector3.zero
-                    part.AssemblyLinearVelocity = Vector3.zero
-                    part.AssemblyAngularVelocity = Vector3.zero
+            if not isJump then
+                for _, part in ipairs(model:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Velocity = Vector3.new(part.Velocity.X, math.min(part.Velocity.Y, 0), part.Velocity.Z)
+                        part.RotVelocity = Vector3.zero
+                        part.AssemblyLinearVelocity = Vector3.zero
+                        part.AssemblyAngularVelocity = Vector3.zero
+                    end
                 end
             end
         end
