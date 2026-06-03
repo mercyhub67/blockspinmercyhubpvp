@@ -963,38 +963,26 @@ function Sf:Teleport(destination, value, t)
     c()['Running'] = true
     ClearPathLines()
     
-    local char = Client.Character or Client.CharacterAdded:Wait()
-    local RootPart = char:WaitForChild("HumanoidRootPart")
-    local Humanoid = char:WaitForChild("Humanoid")
-    
+    -- แก้ AgentRadius ให้กว้างขึ้น และลบ Costs ประตูออก เพื่อให้เลี้ยวอ้อมกำแพง ไม่ตัดตรงทะลุ
     local path = PathfindingService:CreatePath({
         AgentCanJump = true,
-        AgentJumpHeight = 3,
-        AgentHeight = 5,
-        AgentRadius = 3.5,
+        AgentJumpHeight = 2.5,
+        AgentHeight = 8,
+        AgentRadius = 4.5, -- เพิ่มรัศมีกันเดินเบียดกำแพง
         AgentMaxSlope = 45
     })
     
-    local success = pcall(function()
-        path:ComputeAsync(RootPart.Position, destination)
-    end)
-    
-    if not success then
-        c()['Running'] = false
-        ClearPathLines()
-        return
-    end
+    pcall(function() path:ComputeAsync(RootPart.Position, destination) end)
     
     if path.Status == Enum.PathStatus.Success then
         local waypoints = path:GetWaypoints()
         for i = 1, #waypoints - 1 do
-            local startPos = waypoints[i].Position + Vector3.new(0, 3, 0)
-            local endPos = waypoints[i + 1].Position + Vector3.new(0, 3, 0)
-            DrawPathLine(startPos, endPos)
+            DrawPathLine(waypoints[i].Position + Vector3.new(0, 3, 0), waypoints[i + 1].Position + Vector3.new(0, 3, 0))
         end
         
         for _, wp in pairs(waypoints) do
-            local targetPos = wp.Position + Vector3.new(0, 3, 0)
+            local offsetY = (wp.Action == Enum.PathWaypointAction.Jump) and 10 or 4
+            local targetPos = wp.Position + Vector3.new(0, offsetY, 0)
             local startPos = RootPart.Position
             local dir = (targetPos - startPos).Unit
             local dist = (targetPos - startPos).Magnitude
@@ -1005,51 +993,150 @@ function Sf:Teleport(destination, value, t)
             while movedDist < dist and not c().StopWalking and shouldContinue(value) do
                 task.wait()
                 c()['Running'] = true
-                
-                if c().StopWalking or not shouldContinue(value) or Humanoid.Health <= 0 then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    break
-                end
-                
+                if c().StopWalking or not shouldContinue(value) or Humanoid.Health <= 0 then break end
                 if self:Detect() then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    return self:Teleport(destination, value, t)
-                end
-                
-                if (t and t:GetAttribute(c().keys[3])) then
-                    c()['Running'] = false
-                    ClearPathLines()
-                    break
-                end
-                
-                if t and self:CheckingIsMinigame() then
-                    c()['Running'] = false
                     ClearPathLines()
                     return self:Teleport(destination, value, t)
                 end
                 
                 local elapsedTime = tick() - startTime
                 movedDist = math.min(elapsedTime * speed, dist)
-                local newPos = startPos + dir * movedDist
-                
-                if Humanoid.Sit then
-                    Humanoid.Sit = false
-                end
-                
-                RootPart:PivotTo(CFrame.new(newPos))
+                RootPart:PivotTo(CFrame.new(startPos + dir * movedDist))
                 Sf:Ac("set_sprinting_1", true)
             end
-            
+            if not shouldContinue(value) then break end
+        end
+    end
+    c()['Running'] = false
+    ClearPathLines()
+end
+
+function Sf:Drive(model, destination, value, t)
+    if not model or not model.PrimaryPart then return end
+    c().StopWalking = false
+    ClearPathLines()
+
+    -- แก้ AgentRadius ของรถให้กว้างขึ้น และลบ Costs ที่ทำให้ขับทะลุประตูออก
+    local path = PathfindingService:CreatePath({
+        AgentRadius = c().VechineType == "car" and 7.5 or 5, -- ขยายรัศมีวงเลี้ยวรถให้กว้างขึ้น ไม่ให้เบียดชนกำแพง
+        AgentHeight = 8,
+        AgentCanJump = true,
+        AgentMaxSlope = 50,
+        AgentCanClimb = false,
+        WaypointSpacing = 8
+    })
+
+    local success = pcall(function()
+        path:ComputeAsync(model.PrimaryPart.Position, destination)
+    end)
+
+    if not success or path.Status ~= Enum.PathStatus.Success then
+        c()['Running'] = false
+        ClearPathLines()
+        return
+    end
+
+    local waypoints = path:GetWaypoints()
+    if #waypoints < 2 then
+        c()['Running'] = false
+        ClearPathLines()
+        return
+    end
+
+    for i = 1, #waypoints - 1 do
+        local startPos = waypoints[i].Position + Vector3.new(0, 5, 0)
+        local endPos = waypoints[i+1].Position + Vector3.new(0, 5, 0)
+        DrawPathLine(startPos, endPos)
+    end
+
+    for i, wp in pairs(waypoints) do
+        if not model or not model.PrimaryPart then
             c()['Running'] = false
-            if not shouldContinue(value) then
+            ClearPathLines()
+            return
+        end
+
+        local isJump = (wp.Action == Enum.PathWaypointAction.Jump)
+        local heightOffset = isJump and 6 or 2.5
+        local goalPos = wp.Position + Vector3.new(0, heightOffset, 0)
+
+        local distToGoal = (goalPos - model:GetPivot().Position).Magnitude
+        local speed = c().InstantVechineSpeed or 55
+        local startTime = tick()
+
+        if isJump and Humanoid then
+            Humanoid.Jump = true
+        end
+
+        while distToGoal > 0.5 and shouldContinue(value) do
+            task.wait()
+            if not model or not model.PrimaryPart then
+                c()['Running'] = false
+                ClearPathLines()
+                return
+            end
+            c()['Running'] = true
+
+            if not shouldContinue(value) or not Humanoid.Sit then
+                c()['Running'] = false
                 ClearPathLines()
                 break
             end
+
+            if self:Detect() then
+                c()['Running'] = false
+                ClearPathLines()
+                return self:Drive(model, destination, value, t)
+            end
+
+            if self:CheckingIsMinigame() or (t and t:GetAttribute(tostring(c().keys[3]))) then
+                c()['Running'] = false
+                ClearPathLines()
+                break
+            end
+
+            local now = tick()
+            local dt = math.min(0.1, now - startTime)
+            startTime = now
+
+            local currentPos = model:GetPivot().Position
+            local moveDelta = goalPos - currentPos
+            local moveDirection = moveDelta.Unit
+            local step = speed * dt
+            local newPos
+
+            if moveDelta.Magnitude <= step then
+                newPos = goalPos
+                distToGoal = 0
+            else
+                newPos = currentPos + moveDirection * step
+                distToGoal = (goalPos - newPos).Magnitude
+            end
+
+            local lookTarget = newPos + moveDirection
+            local newCFrame = CFrame.lookAt(newPos, lookTarget)
+            model:PivotTo(newCFrame)
+
+            if not isJump then
+                for _, part in ipairs(model:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Velocity = Vector3.new(part.Velocity.X, math.min(part.Velocity.Y, 0), part.Velocity.Z)
+                        part.RotVelocity = Vector3.zero
+                        part.AssemblyLinearVelocity = Vector3.zero
+                        part.AssemblyAngularVelocity = Vector3.zero
+                    end
+                end
+            end
         end
-        ClearPathLines()
+
+        c()['Running'] = false
+        if not shouldContinue(value) then
+            ClearPathLines()
+            break
+        end
     end
+
+    ClearPathLines()
     c()['Running'] = false
 end
 
