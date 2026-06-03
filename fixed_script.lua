@@ -967,12 +967,12 @@ function Sf:Drive(model, destination, value, t)
     ClearPathLines()
 
     local path = PathfindingService:CreatePath({
-        AgentRadius = c().VechineType == "car" and 6 or 3.5,
+        AgentRadius = c().VechineType == "car" and 6 or 5,
         AgentHeight = 8,
         AgentCanJump = true,
         AgentMaxSlope = 50,
         AgentCanClimb = false,
-        WaypointSpacing = 8,
+        WaypointSpacing = 3,
         Costs = {
             BlockedNode = 100,
             Cars = 1,
