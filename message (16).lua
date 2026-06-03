@@ -1006,76 +1006,95 @@ function Sf:Drive(model, destination, value, t)
 
     -- วนลูปผ่านทุก waypoint
  for i, wp in pairs(waypoints) do
-    if not model or not model.PrimaryPart then
-        c()['Running'] = false
-        ClearPathLines()
-        return
-    end
-
-    local isJump = (wp.Action == Enum.PathWaypointAction.Jump)
-    local heightOffset = isJump and 6 or 2.5
-    local goalPos = wp.Position + Vector3.new(0, heightOffset, 0)
-
-    local distToGoal = (goalPos - model:GetPivot().Position).Magnitude
-    local speed = c().InstantVechineSpeed or 55
-    local startTime = tick()
-
-    if isJump and Humanoid then
-        Humanoid.Jump = true
-    end
-
-    while distToGoal > 0.5 and shouldContinue(value) do
-        task.wait()
         if not model or not model.PrimaryPart then
             c()['Running'] = false
             ClearPathLines()
             return
         end
-        c()['Running'] = true
 
-        if not shouldContinue(value) or not Humanoid.Sit then
-            c()['Running'] = false
-            ClearPathLines()
-            break
+        local isJump = (wp.Action == Enum.PathWaypointAction.Jump)
+        local heightOffset = isJump and 6 or 2.5
+        local goalPos = wp.Position + Vector3.new(0, heightOffset, 0)
+
+        local distToGoal = (goalPos - model:GetPivot().Position).Magnitude
+        local speed = c().InstantVechineSpeed or 55
+        local startTime = tick()
+
+        if isJump and Humanoid then
+            Humanoid.Jump = true
         end
 
-        local now = tick()
-        local dt = math.min(0.1, now - startTime)
-        startTime = now
+        while distToGoal > 0.5 and shouldContinue(value) do
+            task.wait()
+            if not model or not model.PrimaryPart then
+                c()['Running'] = false
+                ClearPathLines()
+                return
+            end
+            c()['Running'] = true
 
-        local currentPos = model:GetPivot().Position
-        local moveDelta = goalPos - currentPos
-        local moveDirection = moveDelta.Unit
-        local step = speed * dt
-        local newPos
+            if not shouldContinue(value) or not Humanoid.Sit then
+                c()['Running'] = false
+                ClearPathLines()
+                break
+            end
 
-        if moveDelta.Magnitude <= step then
-            newPos = goalPos
-            distToGoal = 0
-        else
-            newPos = currentPos + moveDirection * step
-            distToGoal = (goalPos - newPos).Magnitude
-        end
+            if self:Detect() then
+                c()['Running'] = false
+                ClearPathLines()
+                return self:Drive(model, destination, value, t)
+            end
 
-        local lookTarget = newPos + moveDirection
-        local newCFrame = CFrame.lookAt(newPos, lookTarget)
-        model:PivotTo(newCFrame)
+            if self:CheckingIsMinigame() or (t and t:GetAttribute(tostring(c().keys[3]))) then
+                c()['Running'] = false
+                ClearPathLines()
+                break
+            end
 
-        if not isJump then
-            for _, part in ipairs(model:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Velocity = Vector3.new(part.Velocity.X, math.min(part.Velocity.Y, 0), part.Velocity.Z)
+            local now = tick()
+            local dt = math.min(0.1, now - startTime)
+            startTime = now
+
+            local currentPos = model:GetPivot().Position
+            local moveDelta = goalPos - currentPos
+            local moveDirection = moveDelta.Unit
+            local step = speed * dt
+            local newPos
+
+            if moveDelta.Magnitude <= step then
+                newPos = goalPos
+                distToGoal = 0
+            else
+                newPos = currentPos + moveDirection * step
+                distToGoal = (goalPos - newPos).Magnitude
+            end
+
+            local lookTarget = newPos + moveDirection
+            local newCFrame = CFrame.lookAt(newPos, lookTarget)
+            model:PivotTo(newCFrame)
+
+            if not isJump then
+                for _, part in ipairs(model:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Velocity = Vector3.new(part.Velocity.X, math.min(part.Velocity.Y, 0), part.Velocity.Z)
+                        part.RotVelocity = Vector3.zero
+                        part.AssemblyLinearVelocity = Vector3.zero
+                        part.AssemblyAngularVelocity = Vector3.zero
+                    end
                 end
             end
         end
+
+        c()['Running'] = false
+        if not shouldContinue(value) then
+            ClearPathLines()
+            break
+        end
     end
 
+    ClearPathLines()
     c()['Running'] = false
-    if not shouldContinue(value) then
-        ClearPathLines()
-        break
-    end
-    end
+end
 
 function Sf:FindClosestAvailableATM()
     local closestATM, shortestDist = nil, math.huge
