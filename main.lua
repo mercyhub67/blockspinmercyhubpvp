@@ -1969,6 +1969,37 @@ WeaponTab:Toggle({
 
 WeaponTab:Section({ Title = "COMBAT" })
 
+local MultiShootHook = nil
+local function enableMultiShoot()
+    if MultiShootHook then return end
+    local NetRef = require(game:GetService("ReplicatedStorage").Modules.Core.Net)
+    local OldSend
+    OldSend = hookfunction(NetRef.send, function(...)
+        local args = {...}
+        if args[1] == "shoot_gun" and c().MultiShootEnabled then
+            OldSend(table.unpack(args))
+        end
+        return OldSend(table.unpack(args))
+    end)
+    MultiShootHook = OldSend
+end
+
+Config.MultiShootEnabled = false
+
+WeaponTab:Toggle({
+    Title = 'Multi Shoot',
+    Icon = 'check',
+    Type = 'Checkbox',
+    Value = false,
+    Callback = function(state)
+        Config.MultiShootEnabled = state
+        if state then
+            pcall(enableMultiShoot)
+        end
+    end
+})
+
+
 Config:Register("Fists Modifier", WeaponTab:Toggle({
     Title   = "Melee Aura",
     Desc    = "WideFists",
