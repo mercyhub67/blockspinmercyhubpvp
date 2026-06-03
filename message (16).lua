@@ -963,13 +963,12 @@ function Sf:Teleport(destination, value, t)
     c()['Running'] = true
     ClearPathLines()
     
-    -- แก้ AgentRadius ให้กว้างขึ้น และลบ Costs ประตูออก เพื่อให้เลี้ยวอ้อมกำแพง ไม่ตัดตรงทะลุ
     local path = PathfindingService:CreatePath({
         AgentCanJump = true,
         AgentJumpHeight = 2.5,
         AgentHeight = 8,
-        AgentRadius = 4.5, -- เพิ่มรัศมีกันเดินเบียดกำแพง
-        AgentMaxSlope = 45
+        AgentRadius = 2.5,
+        Costs = {BlockedNode = 50, DoorArea = 1}
     })
     
     pcall(function() path:ComputeAsync(RootPart.Position, destination) end)
@@ -1016,14 +1015,19 @@ function Sf:Drive(model, destination, value, t)
     c().StopWalking = false
     ClearPathLines()
 
-    -- แก้ AgentRadius ของรถให้กว้างขึ้น และลบ Costs ที่ทำให้ขับทะลุประตูออก
     local path = PathfindingService:CreatePath({
-        AgentRadius = c().VechineType == "car" and 7.5 or 5, -- ขยายรัศมีวงเลี้ยวรถให้กว้างขึ้น ไม่ให้เบียดชนกำแพง
+        AgentRadius = c().VechineType == "car" and 6 or 3.5,
         AgentHeight = 8,
         AgentCanJump = true,
         AgentMaxSlope = 50,
         AgentCanClimb = false,
-        WaypointSpacing = 8
+        WaypointSpacing = 8,
+        Costs = {
+            BlockedNode = 100,
+            Cars = 1,
+            Water = math.huge,
+            DoorArea = 1
+        }
     })
 
     local success = pcall(function()
@@ -1083,10 +1087,23 @@ function Sf:Drive(model, destination, value, t)
                 break
             end
 
+            -- [[ เพิ่มระบบแก้ปัญหาตรงนี้ ]] 
+            -- ถ้าตรวจจับได้ว่าเด้งแจ้งเตือนทะลุ (Detect) ให้สั่งลงจากรถ แล้วดึงตัวขึ้นรถใหม่ทันทีเพื่อล้างสถานะติดกำแพง
             if self:Detect() then
-                c()['Running'] = false
                 ClearPathLines()
-                return self:Drive(model, destination, value, t)
+                if Humanoid then
+                    Humanoid.Sit = false -- สั่งลงรถ
+                    task.wait(0.1)
+                    -- วาร์ปรถหลบจุดที่ติดเล็กน้อย และบังคับให้ขึ้นรถใหม่
+                    model:PivotTo(CFrame.new(model.PrimaryPart.Position + Vector3.new(0, 5, 0)))
+                    task.wait(0.1)
+                    for _, prompt in pairs(model.PrimaryPart:GetDescendants()) do
+                        if prompt:IsA('ProximityPrompt') then 
+                            fireproximityprompt(prompt) 
+                        end
+                    end
+                end
+                return self:Drive(model, destination, value, t) -- เริ่มขับพิกัดนี้ใหม่
             end
 
             if self:CheckingIsMinigame() or (t and t:GetAttribute(tostring(c().keys[3]))) then
@@ -1136,125 +1153,6 @@ function Sf:Drive(model, destination, value, t)
         end
     end
 
-    ClearPathLines()
-    c()['Running'] = false
-end
-
-function Sf:Drive(model, destination, value, t)
-    if not model or not model.PrimaryPart then
-        c()['Running'] = false
-        return
-    end
-    c()["StopWalking"] = false
-    ClearPathLines()
-
-    local path = PathfindingService:CreatePath({
-        AgentRadius = c().VechineType == "car" and 7 or 4.5,
-        AgentHeight = 6,
-        AgentCanJump = false,
-        AgentMaxSlope = 40
-    })
-
-    local success = pcall(function()
-        path:ComputeAsync(model.PrimaryPart.Position, destination)
-    end)
-
-    if not success or path.Status ~= Enum.PathStatus.Success then
-        c()['Running'] = false
-        ClearPathLines()
-        return
-    end
-
-    local waypoints = path:GetWaypoints()
-    if #waypoints < 2 then
-        c()['Running'] = false
-        ClearPathLines()
-        return
-    end
-
-    for i = 1, #waypoints - 1 do
-        local startPos = waypoints[i].Position + Vector3.new(0, 5, 0)
-        local endPos = waypoints[i+1].Position + Vector3.new(0, 5, 0)
-        DrawPathLine(startPos, endPos)
-    end
-
-    for i, wp in pairs(waypoints) do
-        if not model or not model.PrimaryPart then
-            c()['Running'] = false
-            ClearPathLines()
-            return
-        end
-        local goalPos = wp.Position + Vector3.new(0, 2.5, 0)
-        local distToGoal = (goalPos - model:GetPivot().Position).Magnitude
-        local speed = c().InstantVechineSpeed or 55
-        local startTime = tick()
-
-        while distToGoal > 1 and shouldContinue(value) do
-            task.wait()
-            if not model or not model.PrimaryPart then
-                c()['Running'] = false
-                ClearPathLines()
-                return
-            end
-            c()['Running'] = true
-            if not shouldContinue(value) then
-                c()['Running'] = false
-                ClearPathLines()
-                break
-            end
-            if self:Detect() then
-                c()['Running'] = false
-                ClearPathLines()
-                return self:Drive(model, destination, value, t)
-            end
-            if not Humanoid.Sit then
-                c()['Running'] = false
-                ClearPathLines()
-                return self:Drive(model, destination, value, t)
-            end
-            if self:CheckingIsMinigame() or (t and t:GetAttribute(tostring(c().keys[3]))) then
-                c()['Running'] = false
-                ClearPathLines()
-                break
-            end
-
-            local now = tick()
-            local dt = math.min(0.1, now - startTime)
-            startTime = now
-
-            local currentPos = model:GetPivot().Position
-            local moveDelta = goalPos - currentPos
-            local moveDirection = moveDelta.Unit
-            local step = speed * dt
-            local newPos
-            
-            if moveDelta.Magnitude <= step then
-                newPos = goalPos
-                distToGoal = 0
-            else
-                newPos = currentPos + moveDirection * step
-                distToGoal = (goalPos - newPos).Magnitude
-            end
-
-            local lookTarget = newPos + moveDirection
-            local newCFrame = CFrame.lookAt(newPos, lookTarget)
-            model:PivotTo(newCFrame)
-
-            for _, part in ipairs(model:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Velocity = Vector3.zero
-                    part.RotVelocity = Vector3.zero
-                    part.AssemblyLinearVelocity = Vector3.zero
-                    part.AssemblyAngularVelocity = Vector3.zero
-                end
-            end
-        end
-        c()['Running'] = false
-        if not shouldContinue(value) then
-            ClearPathLines()
-            break
-        end
-    end
     ClearPathLines()
     c()['Running'] = false
 end
