@@ -1530,8 +1530,8 @@ if c().EnabledDespoit and Sf:GetMoney() > 0 then
 end
 
 local v206 = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))():CreateWindow({
-    Icon = "rbxassetid://81469999547026",
-    Title = "Zenith Hub",
+    Icon = "rbxassetid://118194721156015",
+    Title = "Mercy Hub",
     Icon = "mountain-snow",
     Folder = "Zenith Hub",
     Size = UDim2.fromOffset(400, 400),
