@@ -894,7 +894,8 @@ function Sf:Teleport(destination, value, t)
             local endPos = waypoints[i + 1].Position + Vector3.new(0, 3, 0)
             DrawPathLine(startPos, endPos)
         end
-        
+
+---แก้
         for idx, wp in ipairs(waypoints) do
     local offsetY   = (wp.Action == Enum.PathWaypointAction.Jump) and 10 or 4
     local targetPos = wp.Position + Vector3.new(0, offsetY, 0)
@@ -950,7 +951,7 @@ function Sf:Teleport(destination, value, t)
 
         local dir    = diff.Unit
         local step   = math.min(speed * 0.016, dist)
-        local newPos = curPos + dir * step
+        local newPos = curPos + (dir * step)
 
         if Humanoid.Sit then Humanoid.Sit = false end
 
