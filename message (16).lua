@@ -895,7 +895,7 @@ function Sf:Teleport(destination, value, t)
             DrawPathLine(startPos, endPos)
         end
 
----แก้
+       --แเก้2
         for idx, wp in ipairs(waypoints) do
     local offsetY   = (wp.Action == Enum.PathWaypointAction.Jump) and 10 or 4
     local targetPos = wp.Position + Vector3.new(0, offsetY, 0)
@@ -932,9 +932,9 @@ function Sf:Teleport(destination, value, t)
 
         c()['Running'] = true
 
-        local curPos  = RootPart.Position
-        local diff    = targetPos - curPos
-        local dist    = diff.Magnitude
+        local curPos = RootPart.Position
+        local diff   = targetPos - curPos
+        local dist   = diff.Magnitude
 
         if dist < 0.8 then break end
 
@@ -950,13 +950,15 @@ function Sf:Teleport(destination, value, t)
         lastPos = curPos
 
         local dir    = diff.Unit
-        local step   = math.min(speed * 0.016, dist)
-        local newPos = curPos + (dir * step)
+        local newPos = curPos + dir * speed * 0.016
 
         if Humanoid.Sit then Humanoid.Sit = false end
 
         RootPart:PivotTo(CFrame.new(newPos))
-        Sf:Ac("set_sprinting_1", true)
+
+        if Sf and Sf.Ac then
+            Sf:Ac("set_sprinting_1", true)
+        end
     end
 
     c()['Running'] = false
@@ -968,7 +970,7 @@ end
 
 ClearPathLines()
 c()['Running'] = false
-
+        
 -- ✅ แก้ไขฟังก์ชัน Drive ให้ tween ตรง ๆ และหันหน้าไปตามทิศทางแม่นยำ (แบบฉบับ "โต้ด")
 function Sf:Drive(model, destination, value, t)
     if not model or not model.PrimaryPart then
