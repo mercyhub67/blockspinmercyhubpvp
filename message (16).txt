@@ -931,15 +931,12 @@ function Sf:Teleport(destination, value, t)
 
         c()['Running'] = true
 
-        -- คำนวณ dir ใหม่ทุก frame จากตำแหน่งปัจจุบัน
         local curPos  = RootPart.Position
         local diff    = targetPos - curPos
         local dist    = diff.Magnitude
 
-        -- ถึง waypoint แล้ว ไป waypoint ถัดไป
         if dist < 0.8 then break end
 
-        -- Stuck detection: ถ้าไม่ขยับใน 1.5 วิ recalculate
         if (curPos - lastPos).Magnitude < 0.05 then
             if tick() - stuckTimer > 1.5 then
                 c()['Running'] = false
@@ -952,8 +949,8 @@ function Sf:Teleport(destination, value, t)
         lastPos = curPos
 
         local dir    = diff.Unit
-        local step   = math.min(speed * task.wait and 0.016 or 0.016, dist)
-        local newPos = curPos + dir * speed * 0.016
+        local step   = math.min(speed * 0.016, dist)
+        local newPos = curPos + dir * step
 
         if Humanoid.Sit then Humanoid.Sit = false end
 
