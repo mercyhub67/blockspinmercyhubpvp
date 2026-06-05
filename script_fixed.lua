@@ -955,7 +955,7 @@ function Sf:Drive(model, destination, value, t)
 				lookDirection = dir
 			end
 
-			local Rotation = CFrame.new(newPos) * CFrame.Angles(0, math.atan2(-lookDirection.X, -lookDirection.Z) + math.pi, 0)
+			local Rotation = CFrame.new(newPos) * CFrame.Angles(0, math.atan2(lookDirection.X, lookDirection.Z), 0)
 			model:PivotTo(Rotation)
 
 			for _, part in ipairs(model:GetDescendants()) do
