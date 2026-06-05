@@ -1462,6 +1462,8 @@ end
 									if not c().AutoFarmATM then break end
 									task.wait(0)
 								end
+									Humanoid.Sit = false
+                                    task.wait(0.5)
 								do
 								print("[DEBUG] calling exit_seat")
 									for _, prompt in pairs(vehicle.PrimaryPart:GetDescendants()) do
