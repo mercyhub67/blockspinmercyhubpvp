@@ -205,7 +205,7 @@ local Window
 if WindUI then
     Window = WindUI:CreateWindow({
         Title      = "MERCY HUB  |  Block Spin🔫",
-        Icon = "rbxassetid://133253457738939",
+        Icon = "rbxassetid://118194721156015",
         Author     = "Block spin | Paid💵",
         Folder     = "mercyhub",
         Size       = UDim2.fromOffset(650, 400),
@@ -216,7 +216,7 @@ if WindUI then
     })
 
     Window:Tag({
-        Title  = "v5.6",
+        Title  = "v7.0",
         Color  = Color3.fromHex("#30ff6a"),
         Radius = 12,
     })
