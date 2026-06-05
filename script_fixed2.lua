@@ -1480,11 +1480,12 @@ end
 									local atmPos = closestATM.Area.Position
 									RootPart.CFrame = CFrame.new(atmPos + Vector3.new(0, -3, 0))
 									RootPart.Anchored = false
-									
-									if c().EnabledDespoit and Sf:GetMoney() > 0 then
-										Net.get("transfer_funds", "hand", "bank", Sf:GetMoney())
-										task.wait(0)
-									end
+task.wait(0.5) -- รอให้ character stable ก่อน hack
+
+if c().EnabledDespoit and Sf:GetMoney() > 0 then
+    Net.get("transfer_funds", "hand", "bank", Sf:GetMoney())
+    task.wait(0.3)
+										end
 									
 									print("[DEBUG] isMinigame =", Sf:CheckingIsMinigame(), "| ATM locked =", closestATM:GetAttribute(c().keys[3]))
 									if not Sf:CheckingIsMinigame() and c().AutoFarmATM then
