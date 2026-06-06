@@ -196,8 +196,9 @@ end)
 -- ══════════════════════════════════════════════════════════════
 local WindUI
 pcall(function()
-    WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-end)
+    WindUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua"
+))()
 
 local Window
 if WindUI then
