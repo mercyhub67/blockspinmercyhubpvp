@@ -221,9 +221,9 @@ if WindUI then
         Radius = 0,
     })
 
-    Window:SetBackgroundTransparency(0.25)
-    Window:SetBackgroundImageTransparency(0.25)
-
+    pcall(function() Window:SetBackgroundTransparency(0.25) end)
+pcall(function() Window:SetBackgroundImageTransparency(0.25) end)
+	
     -- Toggle Button
     local gui = Instance.new("ScreenGui", game.CoreGui)
     gui.Name = "NM_Toggle"
