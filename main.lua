@@ -530,17 +530,10 @@ local function predictPosition(part, root)
     local player = parentModel and Players:GetPlayerFromCharacter(parentModel)
     local velocity = (player and calculateVelocity(player)) or Vector3.zero
 
-    local ping   = math.clamp(getPing(), 0.06, 0.35)
-local aimPos = predictPosition(head, root)
-if ping > 0.25 then
-local rootPred = predictPosition(root, root)
-aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
-	end
+    local ping = math.clamp(getPing(), 0.06, 0.35)
 
-    -- speed แนวนอนเท่านั้น (แม่นกว่า magnitude รวม Y)
     local hSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
 
-    -- multiplier ละเอียดขึ้น + ชดเชยการเปลี่ยนทิศ
     local multiplier
     if     hSpeed > 60 then multiplier = 1.50
     elseif hSpeed > 50 then multiplier = 1.42
@@ -550,21 +543,18 @@ aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
     else                     multiplier = 1.05
     end
 
-    -- ถ้า ping สูง ลด multiplier นิดหน่อยเพื่อไม่ over-predict
     if ping > 0.15 then
         multiplier = multiplier * 0.93
     end
 
     local horizontal = Vector3.new(velocity.X, 0, velocity.Z) * ping * multiplier
 
-    -- vertical คมขึ้น: เพิ่ม coefficient จาก 0.22 → 0.30
     local vertical = Vector3.new(
         0,
         math.clamp(velocity.Y * ping * 0.30, -4, 4),
         0
     )
 
-    -- jump boost ละเอียดขึ้น
     local jumpBoost = Vector3.new(
         0,
         velocity.Y > 20 and 0.50
@@ -584,11 +574,16 @@ aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
         )
     end
 
-    return part.Position
-        + horizontal
-        + vertical
-        + jumpBoost
-        + headOffset
+    local basePos = part.Position
+    local predicted = basePos + horizontal + vertical + jumpBoost + headOffset
+
+    -- ถ้า ping สูง lerp ไปหา root prediction เพื่อลด over-predict
+    if ping > 0.25 and root and root ~= part then
+        local rootPredicted = root.Position + horizontal + vertical
+        predicted = predicted:Lerp(rootPredicted, math.clamp((ping - 0.25) / 0.10, 0, 1))
+    end
+
+    return predicted
 end
 
 local function isBehindWall(origin, target)
