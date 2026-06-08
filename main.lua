@@ -1502,7 +1502,7 @@ local function cleanupItemDrawings()
         if not model or not model.Parent then
             pcall(function() data.name:Remove() end)
             pcall(function() data.amount:Remove() end)
-            pcall(function() data.box:Remove() end)
+            pcall(function() data.highlight:Remove() end)
 
             itemDrawings[model] = nil
         end
@@ -1512,20 +1512,16 @@ end
 RunService.RenderStepped:Connect(function()
     cleanupItemDrawings()
 
-    if not DroppedItems then
-        return
-    end
+    if not DroppedItems then return end
 
     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myRoot then
-        return
-    end
+    if not myRoot then return end
 
     -- Hide all
     for _, data in pairs(itemDrawings) do
         data.name.Visible = false
         data.amount.Visible = false
-        data.box.Visible = false
+        data.highlight.Enabled = false
     end
 
     -- Collect & sort
@@ -1541,7 +1537,7 @@ RunService.RenderStepped:Connect(function()
             end)
 
             if ok and zonePos then
-                table.insert(visible,{
+                table.insert(visible, {
                     item = model,
                     dist = (zonePos - myRoot.Position).Magnitude
                 })
@@ -1549,40 +1545,43 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    table.sort(visible,function(a,b)
+    table.sort(visible, function(a, b)
         return a.dist < b.dist
     end)
 
-    for i = 1, math.min(20,#visible) do
+    for i = 1, math.min(20, #visible) do
         local model = visible[i].item
         local data = itemDrawings[model]
 
         if not data then
+            -- สร้าง Highlight แทน Box
+            local hl = Instance.new("Highlight")
+            hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            hl.FillTransparency = 0.6
+            hl.OutlineTransparency = 0
+            hl.Adornee = model
+            hl.Parent = model
+
             data = {
-                name = Drawing.new("Text"),
-                amount = Drawing.new("Text"),
-                box = Drawing.new("Quad")
+                name      = Drawing.new("Text"),
+                amount    = Drawing.new("Text"),
+                highlight = hl
             }
 
             -- Name
-            data.name.Outline = true
-            data.name.OutlineColor = Color3.fromRGB(0,0,0)
-            data.name.Center = true
-            data.name.Size = 13
-            data.name.Font = 2
+            data.name.Outline      = true
+            data.name.OutlineColor = Color3.fromRGB(0, 0, 0)
+            data.name.Center       = true
+            data.name.Size         = 13
+            data.name.Font         = 2
 
             -- Amount
-            data.amount.Outline = true
-            data.amount.OutlineColor = Color3.fromRGB(0,0,0)
-            data.amount.Center = true
-            data.amount.Size = 11
-            data.amount.Font = 2
-            data.amount.Color = Color3.fromRGB(200,200,200)
-
-            -- Box
-            data.box.Thickness = 1
-            data.box.Transparency = 0.9
-            data.box.Filled = false
+            data.amount.Outline      = true
+            data.amount.OutlineColor = Color3.fromRGB(0, 0, 0)
+            data.amount.Center       = true
+            data.amount.Size         = 11
+            data.amount.Font         = 2
+            data.amount.Color        = Color3.fromRGB(200, 200, 200)
 
             itemDrawings[model] = data
         end
@@ -1592,29 +1591,22 @@ RunService.RenderStepped:Connect(function()
         if vis then
             local color = getRarityColor(model)
 
-            -- Name
-            data.name.Color = color
-            data.name.Position = Vector2.new(pos.X, pos.Y - 18)
-            data.name.Text = model.Name
-            data.name.Visible = true
+            -- Highlight สี rarity
+            data.highlight.OutlineColor = color
+            data.highlight.FillColor    = color
+            data.highlight.Enabled      = true
 
-            -- Amount
+            -- ชื่อตรงกลางไอเทม
+            data.name.Color    = color
+            data.name.Position = Vector2.new(pos.X, pos.Y)
+            data.name.Text     = model.Name
+            data.name.Visible  = true
+
+            -- Amount ใต้ชื่อ
             local amt = model:GetAttribute("Amount") or 1
-
-            data.amount.Position = Vector2.new(pos.X, pos.Y + 13)
-            data.amount.Text = amt > 1 and "["..tostring(amt).."]" or ""
-            data.amount.Visible = amt > 1
-
-            -- Box
-            local s = 9
-
-            data.box.PointA = Vector2.new(pos.X - s, pos.Y - s)
-            data.box.PointB = Vector2.new(pos.X + s, pos.Y - s)
-            data.box.PointC = Vector2.new(pos.X + s, pos.Y + s)
-            data.box.PointD = Vector2.new(pos.X - s, pos.Y + s)
-
-            data.box.Color = color
-            data.box.Visible = true
+            data.amount.Position = Vector2.new(pos.X, pos.Y + 15)
+            data.amount.Text     = amt > 1 and "["..tostring(amt).."]" or ""
+            data.amount.Visible  = amt > 1
         end
     end
 end)
@@ -1624,7 +1616,7 @@ Players.PlayerRemoving:Connect(function(player)
         for _, data in pairs(itemDrawings) do
             pcall(function() data.name:Remove() end)
             pcall(function() data.amount:Remove() end)
-            pcall(function() data.box:Remove() end)
+            pcall(function() data.highlight:Remove() end)
         end
 
         itemDrawings = {}
