@@ -2174,13 +2174,7 @@ local DesyncBtn = CharTab:Button({
     Title   = "Invisible + Respawn",
     Callback = function()
         pcall(function()
-            if syn and syn.set_fflag then
-                syn.set_fflag("ReplicationDisableDesyncDetection", "true")
-            elseif set_fflag then
-                set_fflag("ReplicationDisableDesyncDetection", "true")
-            elseif setfflag then
-                setfflag("ReplicationDisableDesyncDetection", "true")
-            end
+            setfflag("ReplicationDisableDesyncDetection", "true")
         end)
         replicatesignal(game:GetService("Players").LocalPlayer.Kill)
     end,
