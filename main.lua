@@ -365,7 +365,7 @@ else
 end
 
 local ConfigManager = Window.ConfigManager
-local Config        = ConfigManager:CreateConfig("CathubConfig")
+local Config = ConfigManager and ConfigManager:CreateConfig("CathubConfig") or {}
 
 -- ── Send Remote reference ─────────────────────────────────────
 local SendRemote
