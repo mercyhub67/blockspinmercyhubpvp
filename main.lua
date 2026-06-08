@@ -503,15 +503,19 @@ end)
 local function calculateVelocity(player)
     local history = positionHistory[player]
     if not history or #history < 2 then return Vector3.new() end
-    -- ใช้ weighted average โดยให้น้ำหนักกับ frame ล่าสุดมากกว่า
-    -- เพื่อให้ตามทันคนที่วิ่งซิกแซกเปลี่ยนทิศทางกะทันหัน
     local sum, totalWeight = Vector3.new(), 0
     for i = 2, #history do
         local dt = history[i].time - history[i - 1].time
         if dt > 0 then
-            local vel    = (history[i].pos - history[i - 1].pos) / dt
-            local weight = i  -- frame ล่าสุด index สูงกว่า = น้ำหนักมากกว่า
-            sum         = sum + vel * weight
+            local raw = (history[i].pos - history[i - 1].pos) / dt
+            -- clamp velocity สูงสุดก่อน weighted average
+            local clamped = Vector3.new(
+                math.clamp(raw.X, -120, 120),
+                math.clamp(raw.Y, -150, 150),
+                math.clamp(raw.Z, -120, 120)
+            )
+            local weight = i
+            sum         = sum + clamped * weight
             totalWeight = totalWeight + weight
         end
     end
@@ -530,17 +534,10 @@ local function predictPosition(part, root)
     local player = parentModel and Players:GetPlayerFromCharacter(parentModel)
     local velocity = (player and calculateVelocity(player)) or Vector3.zero
 
-    local ping   = math.clamp(getPing(), 0.06, 0.35)
-local aimPos = predictPosition(head, root)
-if ping > 0.25 then
-local rootPred = predictPosition(root, root)
-aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
-	end
+    local ping = math.clamp(getPing(), 0.06, 0.35)
 
-    -- speed แนวนอนเท่านั้น (แม่นกว่า magnitude รวม Y)
     local hSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
 
-    -- multiplier ละเอียดขึ้น + ชดเชยการเปลี่ยนทิศ
     local multiplier
     if     hSpeed > 60 then multiplier = 1.50
     elseif hSpeed > 50 then multiplier = 1.42
@@ -550,21 +547,18 @@ aimPos = aimPos:Lerp(rootPred, math.clamp((ping - 0.25) / 0.10, 0, 1))
     else                     multiplier = 1.05
     end
 
-    -- ถ้า ping สูง ลด multiplier นิดหน่อยเพื่อไม่ over-predict
     if ping > 0.15 then
         multiplier = multiplier * 0.93
     end
 
     local horizontal = Vector3.new(velocity.X, 0, velocity.Z) * ping * multiplier
 
-    -- vertical คมขึ้น: เพิ่ม coefficient จาก 0.22 → 0.30
     local vertical = Vector3.new(
         0,
         math.clamp(velocity.Y * ping * 0.30, -4, 4),
         0
     )
 
-    -- jump boost ละเอียดขึ้น
     local jumpBoost = Vector3.new(
         0,
         velocity.Y > 20 and 0.50
