@@ -4,7 +4,7 @@
 -- ============================================================
 local SERVICE_ID = "22934"
 local API_KEY = "19d0ed2a-7f57-41cf-9f63-f089d56f570a"
-local WEBHOOK = "https://discord.com/api/webhooks/1504823602560634972/09wWwv1wOIRlSo_zeqUFxtAsxWLhJ70YPcHlEL4NThoM5ZKg-VVfzLm3S8P0LkYzKNQZ"
+local WEBHOOK = "https://discord.com/api/webhooks/1513491499550113864/criNogx1MO4rrvh57FMGtENPYJlCsjbFc4aNZH8KQ8R2N97qvQ1jTJRyJz86uYEH7FFH"
 
 pcall(function()
     local HttpService = game:GetService("HttpService")
