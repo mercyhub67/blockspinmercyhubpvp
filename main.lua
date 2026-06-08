@@ -2171,12 +2171,15 @@ local CharTab = Window:Tab({ Title = "CHARACTER:", Icon = "user" })
 CharTab:Section({ Title = "CHARACTER:" })
 
 local DesyncBtn = CharTab:Button({
-    Title   = "Invisible + Respawn",
+    Title   = "Invisible",
     Callback = function()
-        local plsraknet = Raknet or raknet
-        if plsraknet and plsraknet.desync then
-            plsraknet.desync(true)
-        end
+        pcall(function()
+            if setfflag then
+                setfflag("ReplicationDisableDesyncDetection", "true")
+            elseif setrbxclipflag then
+                setrbxclipflag("ReplicationDisableDesyncDetection", "true")
+            end
+        end)
         replicatesignal(game:GetService("Players").LocalPlayer.Kill)
     end,
 })
