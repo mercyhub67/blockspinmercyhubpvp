@@ -2043,6 +2043,156 @@ end)
 
 pcall(function() CombatTab:Divider() end)
 
+-- ── BRING PART (Combat Tab) ───────────────────────────────────
+local bringFolder = Instance.new("Folder", workspace)
+bringFolder.Name = "BringSystem"
+local bringCorePart = Instance.new("Part", bringFolder)
+bringCorePart.Name = "BringCore"
+bringCorePart.Anchored = true
+bringCorePart.CanCollide = false
+bringCorePart.Transparency = 1
+bringCorePart.Size = Vector3.new(1,1,1)
+local bringAttachment = Instance.new("Attachment", bringCorePart)
+bringAttachment.Name = "BringAttachment"
+
+local function forcePart(v)
+    if v:IsA("BasePart")
+    and not v.Anchored
+    and not v.Parent:FindFirstChildOfClass("Humanoid")
+    and not v.Parent:FindFirstChild("Head")
+    and v.Name ~= "Handle" then
+        for _, obj in ipairs(v:GetChildren()) do
+            if obj:IsA("BodyMover") or obj:IsA("RocketPropulsion") then obj:Destroy() end
+        end
+        for _, junk in ipairs({"Attachment", "AlignPosition", "Torque"}) do
+            local f = v:FindFirstChild(junk); if f then f:Destroy() end
+        end
+        v.CanCollide = false
+        local att2 = Instance.new("Attachment", v)
+        local torque = Instance.new("Torque", v)
+        torque.Torque = Vector3.new(100000, 100000, 100000)
+        torque.Attachment0 = att2
+        local alignPos = Instance.new("AlignPosition", v)
+        alignPos.MaxForce = math.huge
+        alignPos.MaxVelocity = math.huge
+        alignPos.Responsiveness = 9999
+        alignPos.Attachment0 = att2
+        alignPos.Attachment1 = bringAttachment
+    end
+end
+
+local function getPlayerByNameBring(name)
+    name = string.lower(name)
+    for _, p in ipairs(Players:GetPlayers()) do
+        if string.find(string.lower(p.Name), name)
+        or string.find(string.lower(p.DisplayName), name) then
+            return p
+        end
+    end
+    return nil
+end
+
+local BringActive = false
+local BringConn = nil
+
+local function startBring(playerName)
+    local target = getPlayerByNameBring(playerName)
+    if not target then
+        warn("[Bring] ไม่พบผู้เล่น: " .. playerName)
+        return
+    end
+    local char = target.Character or target.CharacterAdded:Wait()
+    local targetRoot = char:WaitForChild("HumanoidRootPart")
+    for _, v in ipairs(workspace:GetDescendants()) do pcall(forcePart, v) end
+    if BringConn then BringConn:Disconnect() end
+    BringConn = workspace.DescendantAdded:Connect(function(v) pcall(forcePart, v) end)
+    BringActive = true
+    task.spawn(function()
+        while BringActive do
+            if targetRoot and targetRoot.Parent then
+                bringAttachment.WorldCFrame = targetRoot.CFrame
+            end
+            task.wait()
+        end
+    end)
+end
+
+local function stopBring()
+    BringActive = false
+    if BringConn then BringConn:Disconnect(); BringConn = nil end
+end
+
+local function getBringPlayerList()
+    local names = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then table.insert(names, p.Name) end
+    end
+    if #names == 0 then table.insert(names, "ไม่มีผู้เล่นอื่น") end
+    return names
+end
+
+CombatTab:Section({ Title = "BRING PART" })
+
+local selectedBringPlayer = ""
+local bringToggleRef = nil
+
+local bringDropdown = CombatTab:Dropdown({
+    Title    = "เลือกผู้เล่น",
+    Values   = getBringPlayerList(),
+    Value    = getBringPlayerList()[1] or "ไม่มีผู้เล่นอื่น",
+    Multi    = false,
+    Callback = function(selected)
+        if type(selected) == "string" and selected ~= "ไม่มีผู้เล่นอื่น" then
+            selectedBringPlayer = selected
+        else
+            selectedBringPlayer = ""
+        end
+    end,
+})
+
+CombatTab:Button({
+    Title    = "รีเฟรชรายชื่อ",
+    Desc     = "อัปเดตรายชื่อผู้เล่น",
+    Callback = function()
+        local names = getBringPlayerList()
+        bringDropdown:Refresh(names, true)
+    end,
+})
+
+bringToggleRef = CombatTab:Toggle({
+    Title    = "Bring Player",
+    Desc     = "ดึงผู้เล่นที่เลือกมาหาคุณ",
+    Default  = false,
+    Callback = function(state)
+        if state then
+            if not selectedBringPlayer or selectedBringPlayer == "" or selectedBringPlayer == "ไม่มีผู้เล่นอื่น" then
+                if WindUI then WindUI:Notify({ Title = "⚠️ เลือกผู้เล่นก่อน", Duration = 2 }) end
+                bringToggleRef:Set(false)
+                return
+            end
+            startBring(selectedBringPlayer)
+            if WindUI then WindUI:Notify({ Title = "✅ กำลังดึง " .. selectedBringPlayer, Duration = 2 }) end
+        else
+            stopBring()
+            if WindUI then WindUI:Notify({ Title = "❌ หยุดดึงแล้ว", Duration = 2 }) end
+        end
+    end,
+})
+
+Players.PlayerAdded:Connect(function()
+    task.wait(0.5)
+    pcall(function() bringDropdown:Refresh(getBringPlayerList(), true) end)
+end)
+Players.PlayerRemoving:Connect(function(player)
+    task.wait(0.5)
+    pcall(function() bringDropdown:Refresh(getBringPlayerList(), true) end)
+    if BringActive and selectedBringPlayer == player.Name then
+        bringToggleRef:Set(false)
+        stopBring()
+        if WindUI then WindUI:Notify({ Title = "⚠️ ผู้เล่นออกจากเกม", Duration = 2 }) end
+    end
+end)
+
 -- ── TAB: WEAPON ───────────────────────────────────────────────
 local WeaponTab = Window:Tab({ Title = "WEAPON:", Icon = "layers" })
 WeaponTab:Section({ Title = "MODS:" })
