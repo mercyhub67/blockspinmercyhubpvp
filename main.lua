@@ -322,9 +322,6 @@ end)
 -- ══════════════════════════════════════════════════════════════
 --  WindUI Window
 -- ══════════════════════════════════════════════════════════════
--- วางบนสุดของ script ก่อนบรรทัด loadstring WindUI
-getgenv()._raknet = raknet or rnet
-
 local WindUI
 pcall(function()
     WindUI = loadstring(game:HttpGet(
@@ -2173,13 +2170,14 @@ Config:Register("HighlightESP", HighlightESPToggle)
 local CharTab = Window:Tab({ Title = "CHARACTER:", Icon = "user" })
 CharTab:Section({ Title = "CHARACTER:" })
 
-local DesyncToggle = CharTab:Toggle({
-    Title = "Invisible",
-    Default = false,
-    Callback = function(state)
-        if getgenv()._raknet and getgenv()._raknet.desync then
-            getgenv()._raknet.desync(state)
+local DesyncBtn = CharTab:Button({
+    Title   = "Invisible + Respawn",
+    Callback = function()
+        local raknetModule = _G["Raknet"] or _G["raknet"]
+        if raknetModule and typeof(raknetModule.desync) == "function" then
+            raknetModule.desync(true)
         end
+        replicatesignal(game:GetService("Players").LocalPlayer.Kill)
     end,
 })
 
