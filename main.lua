@@ -322,6 +322,9 @@ end)
 -- ══════════════════════════════════════════════════════════════
 --  WindUI Window
 -- ══════════════════════════════════════════════════════════════
+-- วางบนสุดของ script ก่อนบรรทัด loadstring WindUI
+getgenv()._raknet = raknet or rnet
+
 local WindUI
 pcall(function()
     WindUI = loadstring(game:HttpGet(
@@ -2171,16 +2174,11 @@ local CharTab = Window:Tab({ Title = "CHARACTER:", Icon = "user" })
 CharTab:Section({ Title = "CHARACTER:" })
 
 local DesyncToggle = CharTab:Toggle({
-    Title = "Invisible (Desync)",
+    Title = "Invisible",
     Default = false,
     Callback = function(state)
-        local plsraknet = getgenv().raknet or getgenv().rnet
-        if plsraknet and plsraknet.desync then
-            if state then
-                plsraknet.desync(true)
-            else
-                plsraknet.desync(false)
-            end
+        if getgenv()._raknet and getgenv()._raknet.desync then
+            getgenv()._raknet.desync(state)
         end
     end,
 })
