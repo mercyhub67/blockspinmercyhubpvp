@@ -2624,6 +2624,30 @@ MiscTab:Button({
 	end
 })
 
+MiscTab:Button({
+	Title = 'Hop Server',
+	Icon = 'shuffle',
+	Callback = function()
+		local HttpService = game:GetService('HttpService')
+		local TeleportService = game:GetService('TeleportService')
+		local servers = {}
+		local req = game:HttpGet(
+            string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Desc&limit=100", game.PlaceId)
+        )
+		local data = HttpService:JSONDecode(req)
+		if data and data.data then
+			for _, v in pairs(data.data) do
+				if v.playing >= math.floor(v.maxPlayers * 0.4) and v.playing <= math.floor(v.maxPlayers * 0.8) then
+					table.insert(servers, v.id)
+				end
+			end
+		end
+		if #servers > 0 then
+			TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], game.Players.LocalPlayer)
+		end
+	end
+})
+
 MiscTab:Divider()
 
 MiscTab:Button({
