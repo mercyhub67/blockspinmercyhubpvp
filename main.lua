@@ -2170,16 +2170,19 @@ Config:Register("HighlightESP", HighlightESPToggle)
 local CharTab = Window:Tab({ Title = "CHARACTER:", Icon = "user" })
 CharTab:Section({ Title = "CHARACTER:" })
 
-local DesyncBtn = CharTab:Button({
-    Title   = "Invisible + Respawn",
-    Callback = function()
-        local raknetModule = _G["Raknet"] or _G["raknet"]
-        if raknetModule and typeof(raknetModule.desync) == "function" then
-            raknetModule.desync(true)
-        end
-        replicatesignal(game:GetService("Players").LocalPlayer.Kill)
-    end,
-})
+if setfflag("ShowInvisibleRespawnButton") then
+    local DesyncBtn = CharTab:Button({
+        Title   = "Invisible",
+        Callback = function()
+            local raknetModule = _G["Raknet"] or _G["raknet"]
+            local desync_flag = true
+            if raknetModule and typeof(raknetModule.desync) == "function" then
+                raknetModule.desync(desync_flag)
+            end
+            replicatesignal(game:GetService("Players").LocalPlayer.Kill)
+        end,
+    })
+end
 
 local WalkSpeedToggle = CharTab:Toggle({
     Title   = "Walk Speed",
