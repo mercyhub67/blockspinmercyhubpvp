@@ -1237,12 +1237,18 @@ Players.PlayerRemoving:Connect(function(player)
 end)
 
 local function getESPColor(player)
-    if aimTarget == player then
-        return Color3.fromRGB(255, 0, 0)
-    elseif player:GetAttribute("InSplashScreen") then
+    local char = player.Character
+    local inSplash = player:GetAttribute("InSplashScreen")
+        or (char and char:GetAttribute("InSplashScreen"))
+    local inSafe = player:GetAttribute("IsInSafeZone")
+        or (char and char:GetAttribute("IsInSafeZone"))
+
+    if inSplash then
         return Color3.fromRGB(0, 200, 255)
-    elseif player:GetAttribute("IsInSafeZone") then
+    elseif inSafe then
         return Color3.fromRGB(0, 255, 0)
+    elseif aimTarget == player then
+        return Color3.fromRGB(255, 0, 0)
     end
     return Color3.new(1, 1, 1)
 end
@@ -1273,7 +1279,7 @@ RunService.RenderStepped:Connect(function()
                     data.Name.Visible  = true
                     data.Name.Text     = player.Name
                     data.Name.Position = Vector2.new(posHead.X, posHead.Y - 20)
-					data.Name.Color = getESPColor(player)
+                    data.Name.Color    = getESPColor(player)
                 else
                     data.Name.Visible = false
                 end
@@ -1288,7 +1294,7 @@ RunService.RenderStepped:Connect(function()
                     data.Info.Color    = getESPColor(player)
                 else
                     data.Info.Visible = false
-					end
+                end
             else
                 data.Highlight.Enabled = false
                 data.Name.Visible      = false
@@ -2736,6 +2742,18 @@ local function Bootsfps()
 	Lighting.FogEnd = 9e9
 	Lighting.EnvironmentDiffuseScale = 0
 	Lighting.EnvironmentSpecularScale = 0
+	Lighting.Ambient = Color3.fromRGB(120, 120, 120)
+	Lighting.OutdoorAmbient = Color3.fromRGB(120, 120, 120)
+
+	-- ท้องฟ้าสีเทา
+	local sky = Instance.new("Sky")
+	sky.SkyboxBk = "rbxassetid://6444884337"
+	sky.SkyboxDn = "rbxassetid://6444884337"
+	sky.SkyboxFt = "rbxassetid://6444884337"
+	sky.SkyboxLf = "rbxassetid://6444884337"
+	sky.SkyboxRt = "rbxassetid://6444884337"
+	sky.SkyboxUp = "rbxassetid://6444884337"
+	sky.Parent = Lighting
 
 	-- Terrain กาก
 	if Terrain then
@@ -2743,6 +2761,16 @@ local function Bootsfps()
 		Terrain.WaterWaveSpeed = 0
 		Terrain.WaterReflectance = 0
 		Terrain.WaterTransparency = 1
+	end
+
+	-- ลบใบไม้
+	for _, v in ipairs(workspace:GetDescendants()) do
+		if v:IsA("MeshPart") or v:IsA("SpecialMesh") then
+			local name = v.Name:lower()
+			if name:find("leaf") or name:find("leave") or name:find("palm") or name:find("tree") then
+				v:Destroy()
+			end
+		end
 	end
 
 	-- ทำทั้งแมพเป็นสีเทา / plastic
