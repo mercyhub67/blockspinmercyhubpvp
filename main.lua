@@ -2175,9 +2175,12 @@ local DesyncToggle = CharTab:Toggle({
     Default = false,
     Callback = function(state)
         local plsraknet = getgenv().raknet or getgenv().rnet
-        print(type(plsraknet), type(plsraknet and plsraknet.desync))
         if plsraknet and plsraknet.desync then
-            plsraknet.desync(state)
+            if state then
+                plsraknet.desync(true)
+            else
+                plsraknet.desync(false)
+            end
         end
     end,
 })
