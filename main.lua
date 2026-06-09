@@ -2170,14 +2170,15 @@ Config:Register("HighlightESP", HighlightESPToggle)
 local CharTab = Window:Tab({ Title = "CHARACTER:", Icon = "user" })
 CharTab:Section({ Title = "CHARACTER:" })
 
-local DesyncBtn = CharTab:Button({
-    Title   = "Invisible + Respawn",
-    Callback = function()
-        local plsraknet = raknet or rnet
+local DesyncToggle = CharTab:Toggle({
+    Title = "Invisible (Desync)",
+    Default = false,
+    Callback = function(state)
+        desyncOn = state
+        local plsraknet = getgenv().raknet or getgenv().rnet
         if plsraknet and plsraknet.desync then
-            plsraknet.desync(true)
+            plsraknet.desync(state)
         end
-        replicatesignal(game:GetService("Players").LocalPlayer.Kill)
     end,
 })
 
