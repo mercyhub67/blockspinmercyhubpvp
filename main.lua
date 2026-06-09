@@ -221,7 +221,6 @@ local healthESPEnabled    = false
 local inventoryESPEnabled = false
 local highlightEnabled    = false
 
-local desyncOn = false
 local walkSpeedEnabled    = false
 local speedMultiplier     = 0.05
 local jumpPowerEnabled    = false
@@ -2175,8 +2174,8 @@ local DesyncToggle = CharTab:Toggle({
     Title = "Invisible (Desync)",
     Default = false,
     Callback = function(state)
-        desyncOn = state
         local plsraknet = getgenv().raknet or getgenv().rnet
+        print(type(plsraknet), type(plsraknet and plsraknet.desync))
         if plsraknet and plsraknet.desync then
             plsraknet.desync(state)
         end
