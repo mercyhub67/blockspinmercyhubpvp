@@ -221,6 +221,7 @@ local healthESPEnabled    = false
 local inventoryESPEnabled = false
 local highlightEnabled    = false
 
+local desyncOn = false
 local walkSpeedEnabled    = false
 local speedMultiplier     = 0.05
 local jumpPowerEnabled    = false
