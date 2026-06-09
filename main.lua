@@ -2601,50 +2601,27 @@ MiscTab:Button({
 })
 
 MiscTab:Button({
-    Title  = "Server Hop",
-    Desc   = "Hop to a new server (sometime don't work)",
-    Locked = false,
-    Callback = function()
-        local HttpService     = game:GetService("HttpService")
-        local TeleportService = game:GetService("TeleportService")
-        local targetPlace     = 104715542330896
-
-        local ok, data = pcall(function()
-            return HttpService:JSONDecode(
-                game:HttpGet(
-                    "https://games.roblox.com/v1/games/" .. targetPlace ..
-                    "/servers/Public?sortOrder=Desc&limit=100"
-                )
-            )
-        end)
-
-        if not ok or not data or not data.data then
-            warn("ไม่สามารถดึงข้อมูลเซิร์ฟเวอร์ได้เลยพี่")
-            return
-        end
-
-        local available = {}
-        for _, server in ipairs(data.data) do
-            if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                table.insert(available, server)
-            end
-        end
-
-        if #available == 0 then
-            warn("ไม่มีเซิร์ฟเวอร์ว่างเลยพี่ขณะนี้")
-            return
-        end
-
-        table.sort(available, function(a, b) return a.playing > b.playing end)
-
-        game.StarterGui:SetCore("SendNotification", {
-            Title    = "Server Hop",
-            Text     = "กำลังย้ายไปเซิร์ฟเวอร์คนเยอะ...",
-            Duration = 3,
-        })
-
-        TeleportService:TeleportToPlaceInstance(targetPlace, available[1].id, LocalPlayer)
-    end,
+	Title = 'Hop Server',
+	Icon = 'shuffle',
+	Callback = function()
+		local HttpService = game:GetService('HttpService')
+		local TeleportService = game:GetService('TeleportService')
+		local servers = {}
+		local req = game:HttpGet(
+            string.format("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100", game.PlaceId)
+        )
+		local data = HttpService:JSONDecode(req)
+		if data and data.data then
+			for _, v in pairs(data.data) do
+				if v.playing < v.maxPlayers then
+					table.insert(servers, v.id)
+				end
+			end
+		end
+		if #servers > 0 then
+			TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1, #servers)], game.Players.LocalPlayer)
+		end
+	end
 })
 
 MiscTab:Divider()
