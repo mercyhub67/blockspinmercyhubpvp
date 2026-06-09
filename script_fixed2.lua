@@ -1530,9 +1530,9 @@ end
 
 local v206 = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))():CreateWindow({
     Icon = "rbxassetid://81469999547026",
-    Title = "Zenith Hub",
+    Title = "MERCY HUB",
     Icon = "mountain-snow",
-    Folder = "Zenith Hub",
+    Folder = "MERCY HUB",
     Size = UDim2.fromOffset(400, 400),
     MinSize = Vector2.new(560, 350),
     MaxSize = Vector2.new(850, 560),
