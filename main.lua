@@ -2953,6 +2953,11 @@ print("ลบ Door ทั้งหมดแล้ว")
 
 -- Anti-Aim Detector
 do
+	local RunService = game:GetService("RunService")  -- เพิ่มบรรทัดนี้
+    local Players    = game:GetService("Players")      -- เพิ่มบรรทัดนี้
+    local Camera     = workspace.CurrentCamera         -- เพิ่มบรรทัดนี้
+    local LocalPlayer = Players.LocalPlayer
+	
     local antiAimLabels  = {}
     local velHistory     = {}
     local isAntiAim      = {}
