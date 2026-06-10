@@ -2953,11 +2953,11 @@ print("ลบ Door ทั้งหมดแล้ว")
 
 -- Anti-Aim Detector
 do
-	local RunService = game:GetService("RunService")  -- เพิ่มบรรทัดนี้
-    local Players    = game:GetService("Players")      -- เพิ่มบรรทัดนี้
-    local Camera     = workspace.CurrentCamera         -- เพิ่มบรรทัดนี้
-    local LocalPlayer = Players.LocalPlayer
-	
+    local _RS  = game:GetService("RunService")
+    local _P   = game:GetService("Players")
+    local _Cam = workspace.CurrentCamera
+    local _LP  = _P.LocalPlayer
+
     local antiAimLabels  = {}
     local velHistory     = {}
     local isAntiAim      = {}
@@ -2985,12 +2985,12 @@ do
         return label
     end
 
-    RunService.Heartbeat:Connect(function()
+    _RS.Heartbeat:Connect(function()
         local now = tick()
         if now - AA_lastTick < AA_TICK_INTERVAL then return end
         AA_lastTick = now
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player == LocalPlayer then continue end
+        for _, player in ipairs(_P:GetPlayers()) do
+            if player == _LP then continue end
             local char = player.Character
             if not char then
                 if antiAimLabels[player] then antiAimLabels[player].Visible = false end
@@ -3038,7 +3038,7 @@ do
             end
             local label = getOrCreateLabel(player)
             if isAntiAim[player] then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 2.8, 0))
+                local screenPos, onScreen = _Cam:WorldToViewportPoint(head.Position + Vector3.new(0, 2.8, 0))
                 if onScreen then
                     label.Visible  = true
                     label.Position = Vector2.new(screenPos.X, screenPos.Y - 30)
@@ -3051,7 +3051,7 @@ do
         end
     end)
 
-    Players.PlayerRemoving:Connect(function(player)
+    _P.PlayerRemoving:Connect(function(player)
         if antiAimLabels[player] then
             pcall(function() antiAimLabels[player]:Remove() end)
             antiAimLabels[player] = nil
@@ -3063,8 +3063,8 @@ do
         everDetected[player]   = nil
     end)
 
-    Players.PlayerAdded:Connect(function(player)
-        if player == LocalPlayer then return end
+    _P.PlayerAdded:Connect(function(player)
+        if player == _LP then return end
         player.CharacterAdded:Connect(function()
             velHistory[player]     = nil
             antiAimCount[player]   = nil
