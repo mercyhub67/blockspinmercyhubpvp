@@ -336,8 +336,8 @@ if WindUI then
         Icon = "rbxassetid://118194721156015",
         Author     = "Block spin | Paid💵",
         Folder     = "mercyhub",
-        Size       = UDim2.fromOffset(650, 400),
-        Theme      = "Violet",
+        Size       = UDim2.fromOffset(450, 450),
+        Theme      = "Dark",
         Transparent = true,
         Resizable  = true,
         KeyCode    = Enum.KeyCode.G,
@@ -2042,6 +2042,74 @@ Players.PlayerRemoving:Connect(function()
 end)
 
 pcall(function() CombatTab:Divider() end)
+
+local selectedDropRarity = "Common"
+local isDroppingAll      = false
+
+local function getToolsByRarity(filterRarity)
+    local tools = {}
+    local function scanFolder(folder)
+        if not folder then return end
+        for _, tool in ipairs(folder:GetChildren()) do
+            if tool:IsA("Tool") then
+                local rarity = tool:GetAttribute("Rarity") or tool:GetAttribute("rarity") or "Common"
+                if filterRarity == "ทั้งหมด" or rarity == filterRarity then
+                    table.insert(tools, tool)
+                end
+            end
+        end
+    end
+    scanFolder(LocalPlayer:FindFirstChildOfClass("Backpack"))
+    scanFolder(LocalPlayer.Character)
+    return tools
+end
+
+CombatTab:Section({ Title = "DROP ITEMS:" })
+
+CombatTab:Dropdown({
+    Title    = "เลือก Rarity ที่จะทิ้ง",
+    Values   = { "ทั้งหมด", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Omega" },
+    Value    = "Common",
+    Multi    = false,
+    Callback = function(val)
+        selectedDropRarity = val
+    end,
+})
+
+CombatTab:Button({
+    Title    = "ทิ้งทั้งหมดที่เลือก",
+    Desc     = "ทิ้งไอเทมตาม Rarity ที่เลือกทั้งหมด",
+    Callback = function()
+        if isDroppingAll then
+            WindUI:Notify({ Title = "⚠️ กำลังทิ้งอยู่ รอก่อน", Duration = 2 })
+            return
+        end
+        local tools = getToolsByRarity(selectedDropRarity)
+        if #tools == 0 then
+            WindUI:Notify({ Title = "⚠️ ไม่มีไอเทม " .. selectedDropRarity, Duration = 2 })
+            return
+        end
+        isDroppingAll = true
+        WindUI:Notify({ Title = "🗑️ กำลังทิ้ง " .. #tools .. " ชิ้น...", Duration = 2 })
+        task.spawn(function()
+            local success, fail = 0, 0
+            for _, tool in ipairs(tools) do
+                if tool and tool.Parent then
+                    local ok = pcall(function()
+                        BuyPromptUI.drop_request_with_slider(tool, tool:GetAttribute("Amount") or 1)
+                    end)
+                    if ok then success = success + 1 else fail = fail + 1 end
+                    task.wait(0.15)
+                end
+            end
+            isDroppingAll = false
+            WindUI:Notify({
+                Title    = ("✅ ทิ้งสำเร็จ %d | ❌ %d"):format(success, fail),
+                Duration = 3
+            })
+        end)
+    end,
+})
 
 -- ── TAB: WEAPON ───────────────────────────────────────────────
 local WeaponTab = Window:Tab({ Title = "WEAPON:", Icon = "layers" })
