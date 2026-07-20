@@ -171,14 +171,17 @@ Camera.CameraType = Enum.CameraType.Custom
 
 RunService.RenderStepped:Connect(function()
     if not AimEnabled then return end
-    local target = GetTarget()
-    if target then
+        if target then
         local head = target.Parent:FindFirstChild("Head")
+        local isSitting = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid").SeatPart ~= nil
         if head then
-            local aimPos = LookHeadEnabled and head.Position or (head.Position - Vector3.new(0,0.6,0))
+            -- ถ้าอยู่บนรถจะหักลบตำแหน่ง X (ซ้าย) และ Y (ต่ำลง) ตามค่าที่กำหนด
+            local offset = isSitting and Vector3.new(-0.4, 1.2, 0) or Vector3.new(0, 0.6, 0)
+            local aimPos = LookHeadEnabled and head.Position or (head.Position - offset)
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, aimPos)
         end
     end
+
 end)
 
 local ESP = {}
