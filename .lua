@@ -15,7 +15,7 @@ local EnabledSkip      = false
 local NoRecoilEnabled  = false
 local ItemAuraEnabled  = false
 local LookHeadEnabled  = false
-local FOV = 100
+local FOV = 50
 
 -- Item Aura
 local ItemAuraConnections = {}
